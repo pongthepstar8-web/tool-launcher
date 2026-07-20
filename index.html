@@ -352,15 +352,16 @@
     </div>
 
     <script>
-      const API_URL =
-        'https://script.google.com/macros/s/AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ/exec';
-      function loadUsers(callback) {
-        const script = document.createElement('script');
+      const API_URL = 'https://script.google.com/macros/s/d';
+      onclick =
+        "window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')" >
+        function loadUsers(callback) {
+          const script = document.createElement('script');
 
-        script.src = API_URL + '?callback=' + callback;
+          script.src = API_URL + '?callback=' + callback;
 
-        document.body.appendChild(script);
-      }
+          document.body.appendChild(script);
+        };
       function showLauncher(data) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('launcher').style.display = 'block';
@@ -440,9 +441,10 @@
         showLauncher(payload);
       }
       function handleCredentialResponse(response) {
+        const payload = parseJwt(response.credential);
+
         console.log('Google Login Success');
         console.log(payload);
-        const payload = parseJwt(response.credential);
 
         window.googlePayload = payload;
 
