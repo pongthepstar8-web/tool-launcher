@@ -557,7 +557,7 @@
         const card = document.getElementById(toolId);
 
         if (card.classList.contains('locked')) {
-          alert('ระบบนี้ยังไม่ได้รับอนุมัติ กรุณาติดต่อผู้ดูแลระบบ');
+          alert('ระบบนี้รออนุมัติ กรุณาติดต่อผู้ดูแลระบบ');
           return;
         }
 
@@ -859,7 +859,23 @@
           result.message || 'ส่งคำขออนุมัติเรียบร้อยแล้ว กรุณารอผู้ดูแลระบบ'
         );
 
+        const permission = JSON.parse(localStorage.getItem('permission'));
+
+        if (permission && result.tools) {
+          const requestedTools = result.tools.split(',');
+
+          requestedTools.forEach((toolKey) => {
+            permission[toolKey] = 'P';
+          });
+
+          localStorage.setItem('permission', JSON.stringify(permission));
+        }
+
         closeRequestModal();
+
+        const user = JSON.parse(localStorage.getItem('loginUser'));
+
+        showLauncher(user);
       };
     </script>
     <div id="requestModal" class="modal">
