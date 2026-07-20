@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<!-- saved from url=(0097)https://stackblitzstarterskfbzhgkr-kfa5-%2D8080-%2D87cf54cd.local-credentialless.webcontainer.io/ -->
-<html lang="th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="th">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Factory Tool Launcher</title>
 
+https://accounts.google.com/gsi/client async defer></script>
+
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -15,36 +18,69 @@
 
 body{
     background:#f4f6f9;
+    min-height:100vh;
     padding:30px;
 }
 
 h1{
     text-align:center;
-    margin-bottom:40px;
+    margin-bottom:30px;
     color:#333;
+}
+
+#loginBox{
+    text-align:center;
+    margin-top:100px;
+}
+
+#launcher{
+    display:none;
+}
+
+.profile{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:10px;
+    margin-bottom:30px;
+}
+
+.profile img{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+}
+
+.profile button{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:8px 15px;
+    border-radius:8px;
+    cursor:pointer;
 }
 
 .tool-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:25px;
-    max-width:1000px;
+    max-width:1200px;
     margin:auto;
 }
 
 .tool-card{
-    background:#fff;
-    border-radius:20px;
+    background:white;
     padding:25px;
+    border-radius:20px;
     text-align:center;
     cursor:pointer;
-    transition:0.3s;
-    box-shadow:0 4px 10px rgba(0,0,0,.1);
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+    transition:.3s;
 }
 
 .tool-card:hover{
     transform:translateY(-5px);
-    box-shadow:0 10px 20px rgba(0,0,0,.15);
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
 }
 
 .icon{
@@ -53,19 +89,27 @@ h1{
     margin:auto;
     border-radius:20px;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
     font-size:42px;
     color:white;
     margin-bottom:15px;
 }
 
-.dashboard{
+.blue{
     background:#0078D4;
 }
 
-.report{
+.green{
     background:#28A745;
+}
+
+.orange{
+    background:#FF9800;
+}
+
+.purple{
+    background:#9C27B0;
 }
 
 .title{
@@ -75,22 +119,54 @@ h1{
 }
 
 .desc{
-    margin-top:8px;
     color:#666;
+    margin-top:8px;
     font-size:14px;
 }
+
 </style>
 </head>
 <body>
 
 <h1>🏭 Factory Tool Launcher</h1>
 
+<!-- LOGIN -->
+
+<div id="loginBox">
+
+  <h2 style="margin-bottom:20px;">
+      Login ด้วย Gmail
+  </h2>
+
+  <div id="g_id_onload"
+       data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse">
+  </div>
+
+  <div class="g_id_signin"></div>
+
+</div>
+
+<!-- APP LAUNCHER -->
+
+<div id="launcher">
+
+<div class="profile">
+    <img id="avatar">
+    <span id="username"></span>
+    <button onclick="logout()">
+        Logout
+    </button>
+</div>
+
 <div class="tool-grid">
 
     <!-- Dashboard PRO MAX -->
-    <div class="tool-card" onclick="window.open(&#39;https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/&#39;,&#39;_blank&#39;)">
 
-        <div class="icon dashboard">🚀</div>
+    <div class="tool-card"
+        onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')">
+
+        <div class="icon blue">🚀</div>
 
         <div class="title">
             Dashboard PRO MAX
@@ -102,10 +178,12 @@ h1{
 
     </div>
 
-    <!-- Field Report Dashboard -->
-    <div class="tool-card" onclick="window.open(&#39;https://pongthepstar8-web.github.io/Report-EDS-OSP/&#39;,&#39;_blank&#39;)">
+    <!-- Field Report -->
 
-        <div class="icon report">📋</div>
+    <div class="tool-card"
+        onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')">
+
+        <div class="icon green">📋</div>
 
         <div class="title">
             Field Report Dashboard
@@ -117,15 +195,95 @@ h1{
 
     </div>
 
+    <!-- Inventory -->
+
+    <div class="tool-card"
+        onclick="alert('เพิ่ม URL ระบบ Inventory ได้ที่นี่')">
+
+        <div class="icon orange">📦</div>
+
+        <div class="title">
+            Inventory System
+        </div>
+
+        <div class="desc">
+            Stock Management
+        </div>
+
+    </div>
+
+    <!-- Maintenance -->
+
+    <div class="tool-card"
+        onclick="alert('เพิ่ม URL ระบบ Maintenance ได้ที่นี่')">
+
+        <div class="icon purple">🔧</div>
+
+        <div class="title">
+            Maintenance System
+        </div>
+
+        <div class="desc">
+            PM & Breakdown
+        </div>
+
+    </div>
+
 </div>
 
+</div>
 
+<script>
 
-      <script>
-        const source = new EventSource('/livereload');
-        const reload = () => location.reload(true);
-        source.onmessage = reload;
-        source.onerror = () => (source.onopen = reload);
-        console.log('[servor] listening for file changes');
-      </script>
-    </body></html>
+function handleCredentialResponse(response){
+
+    const payload =
+        JSON.parse(atob(response.credential.split('.')[1]));
+
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("launcher").style.display="block";
+
+    document.getElementById("username").innerText =
+        payload.name;
+
+    document.getElementById("avatar").src =
+        payload.picture;
+
+    localStorage.setItem(
+        "loginUser",
+        JSON.stringify(payload)
+    );
+}
+
+function logout(){
+
+    localStorage.removeItem("loginUser");
+
+    location.reload();
+}
+
+window.onload = () => {
+
+    const user =
+        localStorage.getItem("loginUser");
+
+    if(user){
+
+        const data =
+            JSON.parse(user);
+
+        document.getElementById("loginBox").style.display="none";
+        document.getElementById("launcher").style.display="block";
+
+        document.getElementById("username").innerText =
+            data.name;
+
+        document.getElementById("avatar").src =
+            data.picture;
+    }
+}
+
+</script>
+
+</body>
+</html>
