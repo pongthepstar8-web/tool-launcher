@@ -227,6 +227,17 @@
 
     <script>
       function handleCredentialResponse(response) {
+        alert('LOGIN SUCCESS');
+
+        const payload = JSON.parse(
+          decodeURIComponent(escape(atob(response.credential.split('.')[1])))
+        );
+
+        localStorage.setItem('loginUser', JSON.stringify(payload));
+
+        showLauncher(payload);
+      }
+      function handleCredentialResponse(response) {
         const payload = JSON.parse(
           decodeURIComponent(escape(atob(response.credential.split('.')[1])))
         );
