@@ -206,6 +206,28 @@
         opacity: 0.4;
         filter: grayscale(100%);
       }
+      #requestBtn {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      #requestBtn:hover {
+        background: #0b5ed7;
+      }
+
+      body.dark #requestBtn {
+        background: #3b82f6;
+        color: white;
+      }
+
+      body.dark #requestBtn:hover {
+        background: #2563eb;
+      }
     </style>
   </head>
 
@@ -239,6 +261,10 @@
     <div id="launcher">
       <div class="topbar">
         <button id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+        <button id="requestBtn" onclick="manualRequestAccess()">
+          📝 ขออนุมัติใช้งาน
+        </button>
 
         <div class="user-box">
           <img id="avatar" alt="" />
@@ -354,7 +380,14 @@
         console.log('Matched user', user);
 
         if (!user) {
-          requestAccess(payload);
+          const ask = confirm(
+            'ยังไม่มีสิทธิ์ใช้งาน ต้องการส่งคำขออนุมัติหรือไม่?'
+          );
+
+          if (ask) {
+            requestAccess(payload);
+          }
+
           return;
         }
 
@@ -375,6 +408,24 @@
 
         showLauncher(payload);
       };
+      function manualRequestAccess() {
+        const user = localStorage.getItem('loginUser');
+
+        if (!user) {
+          alert('กรุณา Login ด้วย Google ก่อนขออนุมัติ');
+          return;
+        }
+
+        const payload = JSON.parse(user);
+
+        const confirmRequest = confirm('ต้องการส่งคำขออนุมัติใช้งานหรือไม่?');
+
+        if (!confirmRequest) {
+          return;
+        }
+
+        requestAccess(payload);
+      }
       function openTool(toolId) {
         const card = document.getElementById(toolId);
 
@@ -487,6 +538,7 @@
         };
 
         localStorage.setItem('loginUser', JSON.stringify(payload));
+
         localStorage.setItem('permission', JSON.stringify(pendingPermission));
 
         showLauncher(payload);
