@@ -200,7 +200,9 @@
 
     <script>
       function handleCredentialResponse(response) {
-        const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        const payload = JSON.parse(
+          decodeURIComponent(escape(atob(response.credential.split('.')[1])))
+        );
 
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('launcher').style.display = 'block';
