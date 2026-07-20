@@ -1,207 +1,431 @@
 <!DOCTYPE html>
 <html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Factory Tool Launcher</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Factory Tool Launcher</title>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", sans-serif; }
-    body { background: #f4f6f9; min-height: 100vh; padding: 30px; transition: all .3s ease; }
-    h1 { text-align: center; color: #333; margin-bottom: 30px; }
-    #loginBox { text-align: center; margin-top: 50px; }
-    .login-card { background: #fff; max-width: 400px; margin: auto; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,.1); }
-    #launcher { display: none; }
-    .topbar { max-width: 1200px; margin: 0 auto 30px auto; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
-    .user-box { display: flex; align-items: center; gap: 12px; }
-    .user-box img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-    #themeBtn, .logout-btn { border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: all .3s ease; }
-    #themeBtn { background: #333; color: #fff; }
-    .logout-btn { background: #dc3545; color: #fff; }
-    .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
-    .tool-card { background: #fff; border-radius: 20px; padding: 25px; text-align: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,.1); transition: all .3s ease; }
-    .tool-card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,.15); }
-    .icon { width: 90px; height: 90px; margin: auto; border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 42px; color: #fff; margin-bottom: 15px; }
-    .blue { background: #0078d4; }
-    .green { background: #28a745; }
-    .orange { background: #ff9800; }
-    .purple { background: #9c27b0; }
-    .title { font-size: 18px; font-weight: bold; }
-    .desc { color: #666; margin-top: 8px; }
-    body.dark { background: #1f1f1f; color: #fff; }
-    body.dark h1 { color: #fff; }
-    body.dark .tool-card, body.dark .login-card { background: #2d2d2d; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
-    body.dark .desc { color: #ccc; }
-    body.dark .user-box span { color: #fff; }
-    body.dark #themeBtn { background: #fff; color: #000; }
-    body.dark .logout-btn { background: #ff4d4f; }
-  </style>
-</head>
-<body>
-  <h1>🏭 Factory Tool Launcher</h1>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+      }
 
-  <div id="loginBox">
-    <div class="login-card">
-      <h2>🔐 Login ด้วย Google</h2><br>
-      <div id="g_id_onload"
-           data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
-           data-context="signin"
-           data-ux_mode="popup"
-           data-callback="handleCredentialResponse"
-           data-auto_prompt="false">
-      </div>
-      <div class="g_id_signin"
-           data-type="standard"
-           data-shape="pill"
-           data-theme="filled_blue"
-           data-size="large">
+      body {
+        background: #f4f6f9;
+        min-height: 100vh;
+        padding: 30px;
+        transition: all 0.3s ease;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      #loginBox {
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      .login-card {
+        background: white;
+        max-width: 400px;
+        margin: auto;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      #launcher {
+        display: none;
+      }
+
+      .topbar {
+        max-width: 1200px;
+        margin: 0 auto 30px auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .user-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .user-box img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      #themeBtn,
+      .logout-btn {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      #themeBtn {
+        background: #333;
+        color: white;
+      }
+
+      .logout-btn {
+        background: #dc3545;
+        color: white;
+      }
+
+      .tool-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        max-width: 1200px;
+        margin: auto;
+      }
+
+      .tool-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .tool-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .icon {
+        width: 90px;
+        height: 90px;
+        margin: auto;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 42px;
+        color: white;
+        margin-bottom: 15px;
+      }
+
+      .blue {
+        background: #0078d4;
+      }
+      .green {
+        background: #28a745;
+      }
+      .orange {
+        background: #ff9800;
+      }
+      .purple {
+        background: #9c27b0;
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .desc {
+        color: #666;
+        margin-top: 8px;
+      }
+
+      body.dark {
+        background: #1f1f1f;
+        color: white;
+      }
+
+      body.dark h1 {
+        color: white;
+      }
+
+      body.dark .tool-card,
+      body.dark .login-card {
+        background: #2d2d2d;
+        color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      body.dark .desc {
+        color: #cccccc;
+      }
+
+      body.dark .user-box span {
+        color: white;
+      }
+
+      body.dark #themeBtn {
+        background: white;
+        color: black;
+      }
+
+      body.dark .logout-btn {
+        background: #ff4d4f;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>🏭 Factory Tool Launcher</h1>
+
+    <div id="loginBox">
+      <div class="login-card">
+        <h2>🔐 Login ด้วย Google</h2>
+        <br />
+
+        <div
+          id="g_id_onload"
+          data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
+          data-context="signin"
+          data-ux_mode="popup"
+          data-callback="handleCredentialResponse"
+          data-auto_prompt="false"
+        ></div>
+
+        <div
+          class="g_id_signin"
+          data-type="standard"
+          data-shape="pill"
+          data-theme="filled_blue"
+          data-size="large"
+        ></div>
       </div>
     </div>
-  </div>
 
-  <div id="launcher">
-    <div class="topbar">
-      <button id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
-      <div class="user-box">
-        <img id="avatar" alt="" />
-        <span id="username"></span>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+    <div id="launcher">
+      <div class="topbar">
+        <button id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+        <div class="user-box">
+          <img id="avatar" alt="" />
+          <span id="username"></span>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <div class="tool-grid">
+        <div
+          id="tool1"
+          class="tool-card"
+          onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')"
+        >
+          <div class="icon blue">🚀</div>
+          <div class="title">Dashboard PRO MAX</div>
+          <div class="desc">Production Dashboard</div>
+        </div>
+
+        <div
+          id="tool2"
+          class="tool-card"
+          onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')"
+        >
+          <div class="icon green">📋</div>
+          <div class="title">Field Report Dashboard</div>
+          <div class="desc">Report Management</div>
+        </div>
+
+        <div
+          id="tool3"
+          class="tool-card"
+          onclick="alert('ยังไม่ได้ตั้งค่า URL ระบบ Inventory')"
+        >
+          <div class="icon orange">📦</div>
+          <div class="title">Inventory System</div>
+          <div class="desc">Stock Management</div>
+        </div>
+
+        <div
+          id="tool4"
+          class="tool-card"
+          onclick="alert('ยังไม่ได้ตั้งค่า URL ระบบ Maintenance')"
+        >
+          <div class="icon purple">🔧</div>
+          <div class="title">Maintenance System</div>
+          <div class="desc">PM & Breakdown</div>
+        </div>
       </div>
     </div>
 
-    <div class="tool-grid">
-      <div id="tool1" class="tool-card" onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')">
-        <div class="icon blue">🚀</div>
-        <div class="title">Dashboard PRO MAX</div>
-        <div class="desc">Production Dashboard</div>
-      </div>
+    <script>
+      const API_URL =
+        'https://script.google.com/macros/s/' +
+        'AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ' +
+        '/exec';
 
-      <div id="tool2" class="tool-card" onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')">
-        <div class="icon green">📋</div>
-        <div class="title">Field Report Dashboard</div>
-        <div class="desc">Report Management</div>
-      </div>
+      function parseJwt(token) {
+        const base64Url = token.split('.')[1];
 
-      <div id="tool3" class="tool-card" onclick="alert('ยังไม่ได้ตั้งค่า URL ระบบ Inventory')">
-        <div class="icon orange">📦</div>
-        <div class="title">Inventory System</div>
-        <div class="desc">Stock Management</div>
-      </div>
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
 
-      <div id="tool4" class="tool-card" onclick="alert('ยังไม่ได้ตั้งค่า URL ระบบ Maintenance')">
-        <div class="icon purple">🔧</div>
-        <div class="title">Maintenance System</div>
-        <div class="desc">PM & Breakdown</div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const API_URL =
-      "https://script.google.com/macros/s/" +
-      "AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ" +
-      "/exec";
-
-    function parseJwt(token) {
-      const base64Url = token.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      return JSON.parse(decodeURIComponent(atob(base64).split("").map(function(c) {
-        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join("")));
-    }
-
-    window.handleCredentialResponse = function(response) {
-      const payload = parseJwt(response.credential);
-      console.log("Google Login Success", payload);
-      window.googlePayload = payload;
-      const script = document.createElement("script");
-      script.src = API_URL + "?callback=processUsers";
-      document.body.appendChild(script);
-    };
-
-    window.processUsers = function(users) {
-      const payload = window.googlePayload;
-      console.log("Users from Sheet", users);
-
-      const user = users.find(x =>
-        String(x.email).toLowerCase() === String(payload.email).toLowerCase()
-      );
-      console.log("Matched user", user);
-
-      if (!user) {
-        alert("ยังไม่มีสิทธิ์ใช้งาน กรุณารอผู้ดูแลอนุมัติ");
-        return;
+        return JSON.parse(
+          decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+              })
+              .join('')
+          )
+        );
       }
 
-      if (user.status !== "Approved") {
-        alert("บัญชีนี้ยังไม่ได้รับอนุมัติ");
-        return;
+      window.handleCredentialResponse = function (response) {
+        const payload = parseJwt(response.credential);
+
+        console.log('Google Login Success', payload);
+
+        window.googlePayload = payload;
+
+        const script = document.createElement('script');
+        script.src =
+          API_URL + '?callback=processUsers&t=' + new Date().getTime();
+
+        script.onload = function () {
+          console.log('Apps Script loaded');
+        };
+
+        script.onerror = function () {
+          console.error('Apps Script load failed');
+          alert('โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ');
+        };
+
+        document.body.appendChild(script);
+      };
+
+      window.processUsers = function (users) {
+        const payload = window.googlePayload;
+
+        console.log('Users from Sheet', users);
+
+        const user = users.find(
+          (x) =>
+            String(x.email).toLowerCase() ===
+            String(payload.email).toLowerCase()
+        );
+
+        console.log('Matched user', user);
+
+        if (!user) {
+          alert('ยังไม่มีสิทธิ์ใช้งาน กรุณารอผู้ดูแลอนุมัติ');
+          return;
+        }
+
+        if (user.status !== 'Approved') {
+          alert('บัญชีนี้ยังไม่ได้รับอนุมัติ');
+          return;
+        }
+
+        localStorage.setItem('loginUser', JSON.stringify(payload));
+        localStorage.setItem('permission', JSON.stringify(user));
+
+        console.log('Permission OK', user);
+
+        showLauncher(payload);
+      };
+
+      function showLauncher(data) {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('launcher').style.display = 'block';
+
+        document.getElementById('username').innerText =
+          data.name || data.email || 'User';
+
+        document.getElementById('avatar').src = data.picture || '';
+
+        document.getElementById('tool1').style.display = 'block';
+        document.getElementById('tool2').style.display = 'block';
+        document.getElementById('tool3').style.display = 'block';
+        document.getElementById('tool4').style.display = 'block';
+
+        const permission = JSON.parse(localStorage.getItem('permission'));
+
+        if (!permission) {
+          return;
+        }
+
+        if (permission.role === 'Admin') {
+          return;
+        }
+
+        if (permission.tool1 !== 'Y') {
+          document.getElementById('tool1').style.display = 'none';
+        }
+
+        if (permission.tool2 !== 'Y') {
+          document.getElementById('tool2').style.display = 'none';
+        }
+
+        if (permission.tool3 !== 'Y') {
+          document.getElementById('tool3').style.display = 'none';
+        }
+
+        if (permission.tool4 !== 'Y') {
+          document.getElementById('tool4').style.display = 'none';
+        }
       }
 
-      localStorage.setItem("loginUser", JSON.stringify(payload));
-      localStorage.setItem("permission", JSON.stringify(user));
-      console.log("Permission OK", user);
-      showLauncher(payload);
-    };
+      function logout() {
+        localStorage.clear();
 
-    function showLauncher(data) {
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("launcher").style.display = "block";
-      document.getElementById("username").innerText = data.name || data.email || "User";
-      document.getElementById("avatar").src = data.picture || "";
+        if (window.google) {
+          google.accounts.id.disableAutoSelect();
+        }
 
-      ["tool1", "tool2", "tool3", "tool4"].forEach(id => {
-        document.getElementById(id).style.display = "block";
-      });
-
-      const permission = JSON.parse(localStorage.getItem("permission"));
-      if (!permission) return;
-      if (permission.role === "Admin") return;
-
-      if (permission.tool1 !== "Y") document.getElementById("tool1").style.display = "none";
-      if (permission.tool2 !== "Y") document.getElementById("tool2").style.display = "none";
-      if (permission.tool3 !== "Y") document.getElementById("tool3").style.display = "none";
-      if (permission.tool4 !== "Y") document.getElementById("tool4").style.display = "none";
-    }
-
-    function logout() {
-      localStorage.clear();
-      if (window.google) google.accounts.id.disableAutoSelect();
-      location.reload();
-    }
-
-    window.onload = function() {
-      const user = localStorage.getItem("loginUser");
-      const permission = localStorage.getItem("permission");
-      const savedTheme = localStorage.getItem("theme");
-
-      if (savedTheme === "dark") {
-        document.body.classList.add("dark");
-        const btn = document.getElementById("themeBtn");
-        if (btn) btn.innerHTML = "☀️ Light Mode";
+        location.reload();
       }
 
-      if (user && permission) {
-        showLauncher(JSON.parse(user));
-      } else {
-        document.getElementById("loginBox").style.display = "block";
-        document.getElementById("launcher").style.display = "none";
-      }
-    };
+      window.onload = function () {
+        const user = localStorage.getItem('loginUser');
+        const permission = localStorage.getItem('permission');
+        const savedTheme = localStorage.getItem('theme');
 
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-      const btn = document.getElementById("themeBtn");
-      if (document.body.classList.contains("dark")) {
-        localStorage.setItem("theme", "dark");
-        btn.textContent = "☀️ Light Mode";
-      } else {
-        localStorage.setItem("theme", "light");
-        btn.textContent = "🌙 Dark Mode";
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark');
+
+          const btn = document.getElementById('themeBtn');
+
+          if (btn) {
+            btn.innerHTML = '☀️ Light Mode';
+          }
+        }
+
+        if (user && permission) {
+          showLauncher(JSON.parse(user));
+        } else {
+          document.getElementById('loginBox').style.display = 'block';
+          document.getElementById('launcher').style.display = 'none';
+        }
+      };
+
+      function toggleTheme() {
+        document.body.classList.toggle('dark');
+
+        const btn = document.getElementById('themeBtn');
+
+        if (document.body.classList.contains('dark')) {
+          localStorage.setItem('theme', 'dark');
+          btn.textContent = '☀️ Light Mode';
+        } else {
+          localStorage.setItem('theme', 'light');
+          btn.textContent = '🌙 Dark Mode';
+        }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
