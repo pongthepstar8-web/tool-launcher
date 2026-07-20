@@ -204,18 +204,25 @@
           decodeURIComponent(escape(atob(response.credential.split('.')[1])))
         );
 
+        localStorage.setItem('loginUser', JSON.stringify(payload));
+
+        showLauncher(payload);
+      }
+
+      function showLauncher(data) {
         document.getElementById('loginBox').style.display = 'none';
+
         document.getElementById('launcher').style.display = 'block';
 
-        document.getElementById('username').innerText = payload.name;
+        document.getElementById('username').textContent =
+          data.name || data.email;
 
-        document.getElementById('avatar').src = payload.picture;
-
-        localStorage.setItem('loginUser', JSON.stringify(payload));
+        document.getElementById('avatar').src = data.picture || '';
       }
 
       function logout() {
         localStorage.removeItem('loginUser');
+
         location.reload();
       }
 
@@ -223,14 +230,7 @@
         const user = localStorage.getItem('loginUser');
 
         if (user) {
-          const data = JSON.parse(user);
-
-          document.getElementById('loginBox').style.display = 'none';
-          document.getElementById('launcher').style.display = 'block';
-
-          document.getElementById('username').innerText = data.name;
-
-          document.getElementById('avatar').src = data.picture;
+          showLauncher(JSON.parse(user));
         }
       };
     </script>
