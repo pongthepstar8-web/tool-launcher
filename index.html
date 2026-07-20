@@ -140,6 +140,13 @@
         border-radius: 20px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
       }
+      .topbar {
+        max-width: 1200px;
+        margin: 0 auto 30px auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
     </style>
   </head>
 
@@ -231,6 +238,22 @@
 
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
 
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(function (c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join('')
+        );
+
+        return JSON.parse(jsonPayload);
+      }
+      function parseJwt(token) {
+        const base64Url = token.split('.')[1];
+
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
         return JSON.parse(
           decodeURIComponent(
             atob(base64)
@@ -250,7 +273,11 @@
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('launcher').style.display = 'block';
 
-        document.getElementById('username').innerText = 'Google User';
+        const payload = parseJwt(response.credential);
+
+        document.getElementById('username').innerText = payload.name;
+
+        document.getElementById('avatar').src = payload.picture;
       }
 
       function showLauncher(data) {
@@ -270,9 +297,6 @@
         if (window.google) {
           google.accounts.id.disableAutoSelect();
         }
-
-        document.getElementById('launcher').style.display = 'none';
-        document.getElementById('loginBox').style.display = 'block';
 
         location.reload();
       }
