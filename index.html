@@ -1,764 +1,336 @@
 <!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Factory Tool Launcher</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', sans-serif;
-      }
-      body {
-        background: #f4f6f9;
-        min-height: 100vh;
-        padding: 30px;
-        transition: all 0.3s ease;
-      }
-      h1 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 30px;
-      }
-      #loginBox {
-        text-align: center;
-        margin-top: 50px;
-      }
-      .login-card {
-        background: white;
-        max-width: 400px;
-        margin: auto;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-      }
-      #launcher {
-        display: none;
-      }
-      .topbar {
-        max-width: 1200px;
-        margin: 0 auto 30px auto;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .user-box {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .user-box img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-      #themeBtn,
-      #requestBtn,
-      .logout-btn,
-      .cancel-btn,
-      .submit-btn {
-        border: none;
-        padding: 8px 15px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-      #themeBtn {
-        background: #333;
-        color: white;
-      }
-      #requestBtn {
-        background: #0d6efd;
-        color: white;
-      }
-      #requestBtn:hover {
-        background: #0b5ed7;
-      }
-      #requestBtn.disabled {
-        background: #999;
-        cursor: not-allowed;
-        opacity: 0.6;
-      }
-      .logout-btn {
-        background: #dc3545;
-        color: white;
-      }
-      .tool-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        max-width: 1200px;
-        margin: auto;
-      }
-      .tool-card {
-        background: white;
-        border-radius: 20px;
-        padding: 25px;
-        text-align: center;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        position: relative;
-      }
-      .tool-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-      }
-      .icon {
-        width: 90px;
-        height: 90px;
-        margin: auto;
-        border-radius: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 42px;
-        color: white;
-        margin-bottom: 15px;
-      }
-      .blue {
-        background: #0078d4;
-      }
-      .green {
-        background: #28a745;
-      }
-      .orange {
-        background: #ff9800;
-      }
-      .purple {
-        background: #9c27b0;
-      }
-      .title {
-        font-size: 18px;
-        font-weight: bold;
-      }
-      .desc {
-        color: #666;
-        margin-top: 8px;
-      }
-      .tool-card.locked {
-        opacity: 0.45;
-        filter: grayscale(100%);
-        cursor: not-allowed;
-      }
-      .tool-card.locked:hover {
-        transform: none;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-      .tool-card.locked::after {
-        content: '🔒 รออนุมัติ';
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: #666;
-        color: white;
-        font-size: 12px;
-        padding: 4px 8px;
-        border-radius: 999px;
-      }
-      .modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.55);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-      }
-      .modal-box {
-        background: white;
-        width: 90%;
-        max-width: 520px;
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-      }
-      .modal-box h2 {
-        margin-bottom: 8px;
-      }
-      .modal-desc {
-        color: #666;
-        margin-bottom: 20px;
-      }
-      .request-list {
-        display: grid;
-        gap: 12px;
-      }
-      .request-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: #f4f6f9;
-        padding: 14px;
-        border-radius: 12px;
-        cursor: pointer;
-        gap: 10px;
-      }
-      .request-item input {
-        transform: scale(1.2);
-      }
-      .request-item.approved,
-      .request-item.requested {
-        opacity: 0.45;
-        filter: grayscale(100%);
-        cursor: not-allowed;
-      }
-      .request-item.approved::after {
-        content: 'มีสิทธิ์แล้ว';
-        font-size: 12px;
-        background: #666;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 999px;
-      }
-      .request-item.requested::after {
-        content: 'รออนุมัติ';
-        font-size: 12px;
-        background: #f59e0b;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 999px;
-      }
-      .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 25px;
-      }
-      .cancel-btn {
-        background: #6c757d;
-        color: white;
-      }
-      .submit-btn {
-        background: #198754;
-        color: white;
-      }
-      body.dark {
-        background: #1f1f1f;
-        color: white;
-      }
-      body.dark h1 {
-        color: white;
-      }
-      body.dark .tool-card,
-      body.dark .login-card,
-      body.dark .modal-box {
-        background: #2d2d2d;
-        color: white;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      }
-      body.dark .desc,
-      body.dark .modal-desc {
-        color: #ccc;
-      }
-      body.dark .user-box span {
-        color: white;
-      }
-      body.dark #themeBtn {
-        background: white;
-        color: black;
-      }
-      body.dark #requestBtn {
-        background: #3b82f6;
-      }
-      body.dark #requestBtn.disabled {
-        background: #777;
-      }
-      body.dark .logout-btn {
-        background: #ff4d4f;
-      }
-      body.dark .request-item {
-        background: #1f1f1f;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>🏭 Factory Tool Launcher</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Factory Tool Launcher</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", sans-serif; }
+    body { background:#f4f6f9; min-height:100vh; padding:30px; transition:all .3s ease; }
+    h1 { text-align:center; color:#333; margin-bottom:30px; }
+    #loginBox { text-align:center; margin-top:50px; }
+    .login-card { background:white; max-width:400px; margin:auto; padding:30px; border-radius:20px; box-shadow:0 5px 20px rgba(0,0,0,.1); }
+    #launcher { display:none; }
+    .topbar { max-width:1200px; margin:0 auto 30px auto; display:flex; justify-content:flex-end; align-items:center; gap:12px; flex-wrap:wrap; }
+    .user-box { display:flex; align-items:center; gap:12px; }
+    .user-box img { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+    #themeBtn, #requestBtn, .logout-btn, .cancel-btn, .submit-btn { border:none; padding:8px 15px; border-radius:8px; cursor:pointer; transition:all .3s ease; }
+    #themeBtn { background:#333; color:white; }
+    #requestBtn { background:#0d6efd; color:white; }
+    #requestBtn:hover { background:#0b5ed7; }
+    #requestBtn.disabled { background:#999; cursor:not-allowed; opacity:.6; }
+    .logout-btn { background:#dc3545; color:white; }
+    .tool-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; max-width:1200px; margin:auto; }
+    .tool-card { background:white; border-radius:20px; padding:25px; text-align:center; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,.1); transition:all .3s ease; position:relative; }
+    .tool-card:hover { transform:translateY(-6px); box-shadow:0 12px 25px rgba(0,0,0,.15); }
+    .icon { width:90px; height:90px; margin:auto; border-radius:20px; display:flex; justify-content:center; align-items:center; font-size:42px; color:white; margin-bottom:15px; }
+    .blue{background:#0078d4;} .green{background:#28a745;} .orange{background:#ff9800;} .purple{background:#9c27b0;}
+    .title { font-size:18px; font-weight:bold; }
+    .desc { color:#666; margin-top:8px; }
+    .tool-card.locked { opacity:.45; filter:grayscale(100%); cursor:not-allowed; }
+    .tool-card.locked:hover { transform:none; box-shadow:0 4px 15px rgba(0,0,0,.1); }
+    .tool-card.locked::after { content:"🔒 รออนุมัติ"; position:absolute; top:12px; right:12px; background:#666; color:white; font-size:12px; padding:4px 8px; border-radius:999px; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center; }
+    .modal-box { background:white; width:90%; max-width:520px; border-radius:20px; padding:25px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+    .modal-box h2 { margin-bottom:8px; }
+    .modal-desc { color:#666; margin-bottom:20px; }
+    .request-list { display:grid; gap:12px; }
+    .request-item { display:flex; align-items:center; justify-content:space-between; background:#f4f6f9; padding:14px; border-radius:12px; cursor:pointer; gap:10px; }
+    .request-item input { transform:scale(1.2); }
+    .request-item.approved, .request-item.requested, .request-item.denied { opacity:.45; filter:grayscale(100%); cursor:not-allowed; }
+    .request-item.approved::after { content:"มีสิทธิ์แล้ว"; font-size:12px; background:#666; color:white; padding:4px 8px; border-radius:999px; }
+    .request-item.requested::after { content:"รออนุมัติ"; font-size:12px; background:#f59e0b; color:white; padding:4px 8px; border-radius:999px; }
+    .request-item.denied::after { content:"ไม่อนุมัติ"; font-size:12px; background:#dc3545; color:white; padding:4px 8px; border-radius:999px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:25px; }
+    .cancel-btn { background:#6c757d; color:white; }
+    .submit-btn { background:#198754; color:white; }
+    body.dark { background:#1f1f1f; color:white; }
+    body.dark h1 { color:white; }
+    body.dark .tool-card, body.dark .login-card, body.dark .modal-box { background:#2d2d2d; color:white; box-shadow:0 4px 20px rgba(0,0,0,.4); }
+    body.dark .desc, body.dark .modal-desc { color:#ccc; }
+    body.dark .user-box span { color:white; }
+    body.dark #themeBtn { background:white; color:black; }
+    body.dark #requestBtn { background:#3b82f6; }
+    body.dark #requestBtn.disabled { background:#777; }
+    body.dark .logout-btn { background:#ff4d4f; }
+    body.dark .request-item { background:#1f1f1f; }
+  </style>
+</head>
+<body>
+  <h1>🏭 Factory Tool Launcher</h1>
 
-    <div id="loginBox">
-      <div class="login-card">
-        <h2>🔐 Login ด้วย Google</h2>
-        <br />
-        <div
-          id="g_id_onload"
-          data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
-          data-context="signin"
-          data-ux_mode="popup"
-          data-callback="handleCredentialResponse"
-          data-auto_prompt="false"
-        ></div>
-        <div
-          class="g_id_signin"
-          data-type="standard"
-          data-shape="pill"
-          data-theme="filled_blue"
-          data-size="large"
-        ></div>
+  <div id="loginBox">
+    <div class="login-card">
+      <h2>🔐 Login ด้วย Google</h2><br />
+      <div id="g_id_onload" data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+      <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-size="large"></div>
+    </div>
+  </div>
+
+  <div id="launcher">
+    <div class="topbar">
+      <button id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+      <button id="requestBtn" onclick="openRequestModal()">📝 ขออนุมัติใช้งาน</button>
+      <div class="user-box">
+        <img id="avatar" alt="" />
+        <span id="username"></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
     </div>
 
-    <div id="launcher">
-      <div class="topbar">
-        <button id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
-        <button id="requestBtn" onclick="openRequestModal()">
-          📝 ขออนุมัติใช้งาน
-        </button>
-        <div class="user-box">
-          <img id="avatar" alt="" />
-          <span id="username"></span>
-          <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
+    <div class="tool-grid">
+      <div id="DashboardPROMAX" class="tool-card" data-url="https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/" onclick="openTool('DashboardPROMAX')">
+        <div class="icon blue">🚀</div><div class="title">Dashboard PRO MAX</div><div class="desc">Production Dashboard</div>
       </div>
-
-      <div class="tool-grid">
-        <div
-          id="DashboardPROMAX"
-          class="tool-card"
-          data-url="https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/"
-          onclick="openTool('DashboardPROMAX')"
-        >
-          <div class="icon blue">🚀</div>
-          <div class="title">Dashboard PRO MAX</div>
-          <div class="desc">Production Dashboard</div>
-        </div>
-        <div
-          id="FieldReportDashboard"
-          class="tool-card"
-          data-url="https://pongthepstar8-web.github.io/Report-EDS-OSP/"
-          onclick="openTool('FieldReportDashboard')"
-        >
-          <div class="icon green">📋</div>
-          <div class="title">Field Report Dashboard</div>
-          <div class="desc">Report Management</div>
-        </div>
-        <div
-          id="InventorySystem"
-          class="tool-card"
-          data-url=""
-          onclick="openTool('InventorySystem')"
-        >
-          <div class="icon orange">📦</div>
-          <div class="title">Inventory System</div>
-          <div class="desc">Stock Management</div>
-        </div>
-        <div
-          id="MaintenanceSystem"
-          class="tool-card"
-          data-url=""
-          onclick="openTool('MaintenanceSystem')"
-        >
-          <div class="icon purple">🔧</div>
-          <div class="title">Maintenance System</div>
-          <div class="desc">PM & Breakdown</div>
-        </div>
+      <div id="FieldReportDashboard" class="tool-card" data-url="https://pongthepstar8-web.github.io/Report-EDS-OSP/" onclick="openTool('FieldReportDashboard')">
+        <div class="icon green">📋</div><div class="title">Field Report Dashboard</div><div class="desc">Report Management</div>
+      </div>
+      <div id="InventorySystem" class="tool-card" data-url="" onclick="openTool('InventorySystem')">
+        <div class="icon orange">📦</div><div class="title">Inventory System</div><div class="desc">Stock Management</div>
+      </div>
+      <div id="MaintenanceSystem" class="tool-card" data-url="" onclick="openTool('MaintenanceSystem')">
+        <div class="icon purple">🔧</div><div class="title">Maintenance System</div><div class="desc">PM & Breakdown</div>
       </div>
     </div>
+  </div>
 
-    <div id="requestModal" class="modal">
-      <div class="modal-box">
-        <h2>📝 ขออนุมัติใช้งานระบบ</h2>
-        <p class="modal-desc">เลือกระบบที่ต้องการขอสิทธิ์ใช้งาน</p>
-        <div id="requestToolList" class="request-list"></div>
-        <div class="modal-actions">
-          <button class="cancel-btn" onclick="closeRequestModal()">
-            ยกเลิก
-          </button>
-          <button class="submit-btn" onclick="submitToolRequest()">
-            ส่งคำขอ
-          </button>
-        </div>
+  <div id="requestModal" class="modal">
+    <div class="modal-box">
+      <h2>📝 ขออนุมัติใช้งานระบบ</h2>
+      <p class="modal-desc">เลือกระบบที่ต้องการขอสิทธิ์ใช้งาน</p>
+      <div id="requestToolList" class="request-list"></div>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeRequestModal()">ยกเลิก</button>
+        <button class="submit-btn" onclick="submitToolRequest()">ส่งคำขอ</button>
       </div>
     </div>
+  </div>
 
-    <script>
-      const API_URL =
-        'https://script.google.com/macros/s/' +
-        'AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ' +
-        '/exec';
+  <script>
+    const API_URL = "https://script.google.com/macros/s/" +
+      "AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ" +
+      "/exec";
 
-      const TOOL_LIST = [
-        {
-          id: 'DashboardPROMAX',
-          permissionKey: 'DashboardPROMAX',
-          name: 'Dashboard PRO MAX',
-        },
-        {
-          id: 'FieldReportDashboard',
-          permissionKey: 'FieldReportDashboard',
-          name: 'Field Report Dashboard',
-        },
-        {
-          id: 'InventorySystem',
-          permissionKey: 'InventorySystem',
-          name: 'Inventory System',
-        },
-        {
-          id: 'MaintenanceSystem',
-          permissionKey: 'MaintenanceSystem',
-          name: 'Maintenance System',
-        },
-      ];
+    const TOOL_LIST = [
+      { id: "DashboardPROMAX", permissionKey: "DashboardPROMAX", name: "Dashboard PRO MAX" },
+      { id: "FieldReportDashboard", permissionKey: "FieldReportDashboard", name: "Field Report Dashboard" },
+      { id: "InventorySystem", permissionKey: "InventorySystem", name: "Inventory System" },
+      { id: "MaintenanceSystem", permissionKey: "MaintenanceSystem", name: "Maintenance System" }
+    ];
 
-      function parseJwt(token) {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(
-          decodeURIComponent(
-            atob(base64)
-              .split('')
-              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-              .join('')
-          )
-        );
+    function normalizeStatus(value) {
+      const v = String(value || "").trim();
+      if (v === "Y") return "Approved";
+      if (v === "N") return "";
+      return v;
+    }
+
+    function parseJwt(token) {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      return JSON.parse(decodeURIComponent(atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")));
+    }
+
+    window.handleCredentialResponse = function(response) {
+      const payload = parseJwt(response.credential);
+      window.googlePayload = payload;
+      const script = document.createElement("script");
+      script.src = API_URL + "?callback=processUsers&t=" + new Date().getTime();
+      script.onerror = function() { alert("โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ"); };
+      document.body.appendChild(script);
+    };
+
+    window.processUsers = function(users) {
+      const payload = window.googlePayload;
+      const user = users.find(x => String(x.email).toLowerCase() === String(payload.email).toLowerCase());
+      if (!user) {
+        const ask = confirm("ยังไม่มีสิทธิ์ใช้งาน ต้องการส่งคำขออนุมัติหรือไม่?");
+        if (ask) requestAccess(payload);
+        return;
       }
+      localStorage.setItem("loginUser", JSON.stringify(payload));
+      localStorage.setItem("permission", JSON.stringify(user));
+      if (user.status !== "Approved") alert("บัญชีนี้อยู่ระหว่างรออนุมัติ");
+      showLauncher(payload);
+    };
 
-      window.handleCredentialResponse = function (response) {
-        const payload = parseJwt(response.credential);
-        window.googlePayload = payload;
-        const script = document.createElement('script');
-        script.src =
-          API_URL + '?callback=processUsers&t=' + new Date().getTime();
-        script.onerror = function () {
-          alert('โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ');
-        };
-        document.body.appendChild(script);
-      };
+    function openTool(toolId) {
+      const card = document.getElementById(toolId);
+      if (!card) { alert("ไม่พบระบบนี้"); return; }
+      if (card.classList.contains("locked")) { alert("ระบบนี้รออนุมัติ กรุณาติดต่อผู้ดูแลระบบ"); return; }
+      const url = card.getAttribute("data-url");
+      if (!url) { alert("ยังไม่ได้ตั้งค่า URL ของระบบนี้"); return; }
+      window.open(url, "_blank");
+    }
 
-      window.processUsers = function (users) {
-        const payload = window.googlePayload;
-        const user = users.find(
-          (x) =>
-            String(x.email).toLowerCase() ===
-            String(payload.email).toLowerCase()
-        );
-        if (!user) {
-          const ask = confirm(
-            'ยังไม่มีสิทธิ์ใช้งาน ต้องการส่งคำขออนุมัติหรือไม่?'
-          );
-          if (ask) requestAccess(payload);
-          return;
-        }
-        localStorage.setItem('loginUser', JSON.stringify(payload));
-        localStorage.setItem('permission', JSON.stringify(user));
-        if (user.status !== 'Approved') alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
-        showLauncher(payload);
-      };
+    function lockTool(toolId) { const card = document.getElementById(toolId); if (card) card.classList.add("locked"); }
+    function unlockTool(toolId) { const card = document.getElementById(toolId); if (card) card.classList.remove("locked"); }
 
-      function openTool(toolId) {
-        const card = document.getElementById(toolId);
-        if (!card) {
-          alert('ไม่พบระบบนี้');
-          return;
-        }
-        if (card.classList.contains('locked')) {
-          alert('ระบบนี้รออนุมัติ กรุณาติดต่อผู้ดูแลระบบ');
-          return;
-        }
-        const url = card.getAttribute('data-url');
-        if (!url) {
-          alert('ยังไม่ได้ตั้งค่า URL ของระบบนี้');
-          return;
-        }
-        window.open(url, '_blank');
-      }
+    function showLauncher(data) {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("launcher").style.display = "block";
+      document.getElementById("username").innerText = data.name || data.email || "User";
+      document.getElementById("avatar").src = data.picture || "";
 
-      function lockTool(toolId) {
-        const card = document.getElementById(toolId);
-        if (card) card.classList.add('locked');
-      }
-      function unlockTool(toolId) {
-        const card = document.getElementById(toolId);
-        if (card) card.classList.remove('locked');
-      }
+      const permission = JSON.parse(localStorage.getItem("permission"));
+      TOOL_LIST.forEach(tool => unlockTool(tool.id));
 
-      function showLauncher(data) {
-        document.getElementById('loginBox').style.display = 'none';
-        document.getElementById('launcher').style.display = 'block';
-
-        document.getElementById('username').innerText =
-          data.name || data.email || 'User';
-
-        document.getElementById('avatar').src = data.picture || '';
-
-        const permission = JSON.parse(localStorage.getItem('permission'));
-
-        TOOL_LIST.forEach((tool) => {
-          unlockTool(tool.id);
-        });
-
-        if (!permission) {
-          TOOL_LIST.forEach((tool) => {
-            lockTool(tool.id);
-          });
-
-          updateRequestButton();
-          return;
-        }
-
-        const requestedTools = getRequestedTools(permission);
-
-        if (permission.status !== 'Approved') {
-          TOOL_LIST.forEach((tool) => {
-            lockTool(tool.id);
-          });
-
-          updateRequestButton();
-          return;
-        }
-
-        if (permission.role === 'Admin') {
-          TOOL_LIST.forEach((tool) => {
-            unlockTool(tool.id);
-          });
-
-          updateRequestButton();
-          return;
-        }
-
-        TOOL_LIST.forEach((tool) => {
-          const key = tool.permissionKey;
-
-          const isApproved = permission[key] === 'Y';
-
-          const isPendingRequest =
-            permission.requestStatus === 'Pending' &&
-            requestedTools.includes(key);
-
-          if (!isApproved || isPendingRequest) {
-            lockTool(tool.id);
-          }
-        });
-
+      if (!permission || permission.status !== "Approved") {
+        TOOL_LIST.forEach(tool => lockTool(tool.id));
         updateRequestButton();
+        return;
       }
 
-      function getRequestedTools(permission) {
-        if (!permission || !permission.requestTools) {
-          return [];
-        }
-
-        return String(permission.requestTools)
-          .split(',')
-          .map((x) => x.trim())
-          .filter(Boolean);
+      if (permission.role === "Admin") {
+        TOOL_LIST.forEach(tool => unlockTool(tool.id));
+        updateRequestButton();
+        return;
       }
 
-      function updateRequestButton() {
-        const btn = document.getElementById('requestBtn');
-        const permission = JSON.parse(localStorage.getItem('permission'));
-        if (!btn || !permission) return;
+      TOOL_LIST.forEach(tool => {
+        const status = normalizeStatus(permission[tool.permissionKey]);
+        if (status !== "Approved") lockTool(tool.id);
+      });
 
-        if (permission.role === 'Admin') {
-          btn.classList.add('disabled');
-          btn.disabled = true;
-          btn.innerText = '✅ ใช้งานครบแล้ว';
-          return;
-        }
+      updateRequestButton();
+    }
 
-        const requestedTools = getRequestedTools(permission);
-        const allToolsCovered = TOOL_LIST.every(
-          (tool) =>
-            permission[tool.permissionKey] === 'Y' ||
-            requestedTools.includes(tool.permissionKey)
-        );
+    function updateRequestButton() {
+      const btn = document.getElementById("requestBtn");
+      const permission = JSON.parse(localStorage.getItem("permission"));
+      if (!btn || !permission) return;
 
-        if (allToolsCovered) {
-          btn.classList.add('disabled');
-          btn.disabled = true;
-          btn.innerText = '⏳ รอดำเนินการ';
-        } else {
-          btn.classList.remove('disabled');
-          btn.disabled = false;
-          btn.innerText = '📝 ขออนุมัติใช้งาน';
-        }
+      if (permission.role === "Admin") {
+        btn.classList.add("disabled"); btn.disabled = true; btn.innerText = "✅ ใช้งานครบแล้ว"; return;
       }
 
-      function openRequestModal() {
-        const permission = JSON.parse(localStorage.getItem('permission'));
+      const allToolsCovered = TOOL_LIST.every(tool => {
+        const status = normalizeStatus(permission[tool.permissionKey]);
+        return status === "Approved" || status === "Pending";
+      });
 
-        if (!permission) {
-          alert('กรุณา Login ก่อนขออนุมัติ');
-          return;
-        }
+      if (allToolsCovered) {
+        btn.classList.add("disabled"); btn.disabled = true; btn.innerText = "⏳ รอดำเนินการ";
+      } else {
+        btn.classList.remove("disabled"); btn.disabled = false; btn.innerText = "📝 ขออนุมัติใช้งาน";
+      }
+    }
 
-        const btn = document.getElementById('requestBtn');
+    function openRequestModal() {
+      const permission = JSON.parse(localStorage.getItem("permission"));
+      if (!permission) { alert("กรุณา Login ก่อนขออนุมัติ"); return; }
+      const btn = document.getElementById("requestBtn");
+      if (btn && btn.disabled) return;
 
-        if (btn && btn.disabled) {
-          return;
-        }
+      const list = document.getElementById("requestToolList");
+      list.innerHTML = "";
 
-        const requestedTools = getRequestedTools(permission);
+      TOOL_LIST.forEach(tool => {
+        const key = tool.permissionKey;
+        const status = normalizeStatus(permission[key]);
+        const isApproved = permission.role === "Admin" || status === "Approved";
+        const isPending = status === "Pending";
+        const isDenied = status === "Denied";
+        const item = document.createElement("label");
+        item.className = "request-item";
+        if (isApproved) item.classList.add("approved");
+        if (isPending) item.classList.add("requested");
+        if (isDenied) item.classList.add("denied");
+        item.innerHTML = `<span>${tool.name}</span><input type="checkbox" value="${key}" ${isApproved || isPending || isDenied ? "disabled" : ""}>`;
+        list.appendChild(item);
+      });
+      document.getElementById("requestModal").style.display = "flex";
+    }
 
-        const list = document.getElementById('requestToolList');
+    function closeRequestModal() { document.getElementById("requestModal").style.display = "none"; }
 
-        list.innerHTML = '';
+    function submitToolRequest() {
+      const checked = document.querySelectorAll("#requestToolList input[type='checkbox']:checked");
+      if (checked.length === 0) { alert("กรุณาเลือกระบบที่ต้องการขออนุมัติ"); return; }
+      const tools = Array.from(checked).map(x => x.value);
+      const user = JSON.parse(localStorage.getItem("loginUser"));
+      if (!user) { alert("กรุณา Login ก่อนส่งคำขอ"); return; }
+      const script = document.createElement("script");
+      script.src = API_URL + "?action=requestTools" +
+        "&email=" + encodeURIComponent(user.email) +
+        "&name=" + encodeURIComponent(user.name || "") +
+        "&tools=" + encodeURIComponent(tools.join(",")) +
+        "&callback=requestToolsResult&t=" + new Date().getTime();
+      document.body.appendChild(script);
+    }
 
-        TOOL_LIST.forEach((tool) => {
-          const key = tool.permissionKey;
-
-          const hasPermission =
-            permission.role === 'Admin' || permission[key] === 'Y';
-
-          const alreadyRequested =
-            permission.requestStatus === 'Pending' &&
-            requestedTools.includes(key);
-
-          const item = document.createElement('label');
-
-          item.className = 'request-item';
-
-          if (hasPermission && !alreadyRequested) {
-            item.classList.add('approved');
-          }
-
-          if (alreadyRequested) {
-            item.classList.add('requested');
-          }
-
-          item.innerHTML = `
-      <span>${tool.name}</span>
-      <input
-        type="checkbox"
-        value="${key}"
-        ${hasPermission || alreadyRequested ? 'disabled' : ''}
-      >
-    `;
-
-          list.appendChild(item);
+    window.requestToolsResult = function(result) {
+      alert(result.message || "ส่งคำขออนุมัติเรียบร้อยแล้ว กรุณารอผู้ดูแลระบบ");
+      const permission = JSON.parse(localStorage.getItem("permission"));
+      if (permission && result.tools) {
+        const requestedTools = result.tools.split(",").map(x => x.trim()).filter(Boolean);
+        requestedTools.forEach(toolKey => {
+          if (normalizeStatus(permission[toolKey]) !== "Approved") permission[toolKey] = "Pending";
         });
-
-        document.getElementById('requestModal').style.display = 'flex';
+        permission.requestTools = result.tools;
+        permission.requestStatus = "Pending";
+        localStorage.setItem("permission", JSON.stringify(permission));
       }
+      closeRequestModal();
+      const user = JSON.parse(localStorage.getItem("loginUser"));
+      showLauncher(user);
+    };
 
-      function closeRequestModal() {
-        document.getElementById('requestModal').style.display = 'none';
-      }
+    function requestAccess(payload) {
+      window.pendingPayload = payload;
+      const script = document.createElement("script");
+      script.src = API_URL + "?action=request" +
+        "&email=" + encodeURIComponent(payload.email) +
+        "&name=" + encodeURIComponent(payload.name || "") +
+        "&callback=requestAccessResult&t=" + new Date().getTime();
+      document.body.appendChild(script);
+    }
 
-      function submitToolRequest() {
-        const checked = document.querySelectorAll(
-          "#requestToolList input[type='checkbox']:checked"
-        );
-        if (checked.length === 0) {
-          alert('กรุณาเลือกระบบที่ต้องการขออนุมัติ');
-          return;
-        }
-        const tools = Array.from(checked).map((x) => x.value);
-        const user = JSON.parse(localStorage.getItem('loginUser'));
-        if (!user) {
-          alert('กรุณา Login ก่อนส่งคำขอ');
-          return;
-        }
-        const script = document.createElement('script');
-        script.src =
-          API_URL +
-          '?action=requestTools' +
-          '&email=' +
-          encodeURIComponent(user.email) +
-          '&name=' +
-          encodeURIComponent(user.name || '') +
-          '&tools=' +
-          encodeURIComponent(tools.join(',')) +
-          '&callback=requestToolsResult&t=' +
-          new Date().getTime();
-        document.body.appendChild(script);
-      }
-
-      window.requestToolsResult = function (result) {
-        alert(
-          result.message || 'ส่งคำขออนุมัติเรียบร้อยแล้ว กรุณารอผู้ดูแลระบบ'
-        );
-        const permission = JSON.parse(localStorage.getItem('permission'));
-        if (permission && result.tools) {
-          const oldRequested = getRequestedTools(permission);
-          const newRequested = result.tools
-            .split(',')
-            .map((x) => x.trim())
-            .filter(Boolean);
-          const mergedRequested = Array.from(
-            new Set([...oldRequested, ...newRequested])
-          );
-          permission.requestTools = mergedRequested.join(',');
-          permission.requestStatus = 'Pending';
-          localStorage.setItem('permission', JSON.stringify(permission));
-        }
-        closeRequestModal();
-        const user = JSON.parse(localStorage.getItem('loginUser'));
-        showLauncher(user);
+    window.requestAccessResult = function(result) {
+      alert(result.message || "ส่งคำขอใช้งานแล้ว กรุณารอผู้ดูแลอนุมัติ");
+      const payload = window.pendingPayload;
+      const pendingPermission = {
+        email: payload.email, role: "User", status: "Pending",
+        DashboardPROMAX: "", FieldReportDashboard: "", InventorySystem: "", MaintenanceSystem: "",
+        requestTools: "", requestStatus: "Pending"
       };
+      localStorage.setItem("loginUser", JSON.stringify(payload));
+      localStorage.setItem("permission", JSON.stringify(pendingPermission));
+      showLauncher(payload);
+    };
 
-      function requestAccess(payload) {
-        window.pendingPayload = payload;
-        const script = document.createElement('script');
-        script.src =
-          API_URL +
-          '?action=request' +
-          '&email=' +
-          encodeURIComponent(payload.email) +
-          '&name=' +
-          encodeURIComponent(payload.name || '') +
-          '&callback=requestAccessResult&t=' +
-          new Date().getTime();
-        document.body.appendChild(script);
+    function logout() {
+      localStorage.clear();
+      if (window.google) google.accounts.id.disableAutoSelect();
+      location.reload();
+    }
+
+    window.onload = function() {
+      const user = localStorage.getItem("loginUser");
+      const permission = localStorage.getItem("permission");
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+        const btn = document.getElementById("themeBtn");
+        if (btn) btn.innerHTML = "☀️ Light Mode";
       }
-
-      window.requestAccessResult = function (result) {
-        alert(result.message || 'ส่งคำขอใช้งานแล้ว กรุณารอผู้ดูแลอนุมัติ');
-        const payload = window.pendingPayload;
-        const pendingPermission = {
-          email: payload.email,
-          role: 'User',
-          status: 'Pending',
-          DashboardPROMAX: 'N',
-          FieldReportDashboard: 'N',
-          InventorySystem: 'N',
-          MaintenanceSystem: 'N',
-          requestTools: '',
-          requestStatus: 'Pending',
-        };
-        localStorage.setItem('loginUser', JSON.stringify(payload));
-        localStorage.setItem('permission', JSON.stringify(pendingPermission));
-        showLauncher(payload);
-      };
-
-      function logout() {
-        localStorage.clear();
-        if (window.google) google.accounts.id.disableAutoSelect();
-        location.reload();
+      if (user && permission) showLauncher(JSON.parse(user));
+      else {
+        document.getElementById("loginBox").style.display = "block";
+        document.getElementById("launcher").style.display = "none";
       }
+    };
 
-      window.onload = function () {
-        const user = localStorage.getItem('loginUser');
-        const permission = localStorage.getItem('permission');
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-          document.body.classList.add('dark');
-          const btn = document.getElementById('themeBtn');
-          if (btn) btn.innerHTML = '☀️ Light Mode';
-        }
-        if (user && permission) showLauncher(JSON.parse(user));
-        else {
-          document.getElementById('loginBox').style.display = 'block';
-          document.getElementById('launcher').style.display = 'none';
-        }
-      };
-
-      function toggleTheme() {
-        document.body.classList.toggle('dark');
-        const btn = document.getElementById('themeBtn');
-        if (document.body.classList.contains('dark')) {
-          localStorage.setItem('theme', 'dark');
-          btn.textContent = '☀️ Light Mode';
-        } else {
-          localStorage.setItem('theme', 'light');
-          btn.textContent = '🌙 Dark Mode';
-        }
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      const btn = document.getElementById("themeBtn");
+      if (document.body.classList.contains("dark")) {
+        localStorage.setItem("theme", "dark"); btn.textContent = "☀️ Light Mode";
+      } else {
+        localStorage.setItem("theme", "light"); btn.textContent = "🌙 Dark Mode";
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
