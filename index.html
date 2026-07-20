@@ -1,229 +1,236 @@
 <!DOCTYPE html>
 <html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Factory Tool Launcher</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Factory Tool Launcher</title>
 
-https://accounts.google.com/gsi/client" async defer></script>
+    https://accounts.google.com/gsi/client
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Segoe UI',sans-serif;
-}
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+      }
 
-body{
-    background:#f4f6f9;
-    min-height:100vh;
-    padding:30px;
-}
+      body {
+        background: #f4f6f9;
+        min-height: 100vh;
+        padding: 30px;
+      }
 
-h1{
-    text-align:center;
-    color:#333;
-    margin-bottom:30px;
-}
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
 
-#loginBox{
-    text-align:center;
-    margin-top:100px;
-}
+      #loginBox {
+        text-align: center;
+        margin-top: 100px;
+      }
 
-#launcher{
-    display:none;
-}
+      #launcher {
+        display: none;
+      }
 
-.profile{
-    display:flex;
-    justify-content:flex-end;
-    align-items:center;
-    gap:10px;
-    margin-bottom:20px;
-}
+      .profile {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
 
-.profile img{
-    width:40px;
-    height:40px;
-    border-radius:50%;
-}
+      .profile img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
 
-.profile button{
-    background:#dc3545;
-    color:white;
-    border:none;
-    padding:8px 15px;
-    border-radius:8px;
-    cursor:pointer;
-}
+      .profile button {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
 
-.tool-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:20px;
-    max-width:1200px;
-    margin:auto;
-}
+      .tool-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        max-width: 1200px;
+        margin: auto;
+      }
 
-.tool-card{
-    background:white;
-    border-radius:20px;
-    padding:25px;
-    text-align:center;
-    cursor:pointer;
-    box-shadow:0 4px 15px rgba(0,0,0,.1);
-    transition:0.3s;
-}
+      .tool-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: 0.3s;
+      }
 
-.tool-card:hover{
-    transform:translateY(-5px);
-}
+      .tool-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
 
-.icon{
-    width:90px;
-    height:90px;
-    margin:auto;
-    border-radius:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:42px;
-    color:white;
-    margin-bottom:15px;
-}
+      .icon {
+        width: 90px;
+        height: 90px;
+        margin: auto;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 42px;
+        color: white;
+        margin-bottom: 15px;
+      }
 
-.blue{
-    background:#0078D4;
-}
+      .blue {
+        background: #0078d4;
+      }
 
-.green{
-    background:#28A745;
-}
+      .green {
+        background: #28a745;
+      }
 
-.title{
-    font-size:18px;
-    font-weight:bold;
-}
+      .orange {
+        background: #ff9800;
+      }
 
-.desc{
-    color:#666;
-    margin-top:8px;
-}
-</style>
-</head>
-<body>
+      .purple {
+        background: #9c27b0;
+      }
 
-<h1>🏭 Factory Tool Launcher</h1>
+      .title {
+        font-size: 18px;
+        font-weight: bold;
+      }
 
-<div id="loginBox">
+      .desc {
+        color: #666;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
 
-    <h2>Login ด้วย Gmail</h2>
-    <br>
+  <body>
+    <h1>🏭 Factory Tool Launcher</h1>
 
-    <div id="g_id_onload"
-    data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse">
+    <div id="loginBox">
+      <h2>Login ด้วย Gmail</h2>
+      <br />
+
+      <div
+        id="g_id_onload"
+        data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+      ></div>
+
+      <div
+        class="g_id_signin"
+        data-type="standard"
+        data-theme="outline"
+        data-size="large"
+      ></div>
     </div>
 
-    <div class="g_id_signin"></div>
-
-</div>
-
-<div id="launcher">
-
-    <div class="profile">
-        <img id="avatar">
+    <div id="launcher">
+      <div class="profile">
+        <img id="avatar" alt="" />
         <span id="username"></span>
         <button onclick="logout()">Logout</button>
-    </div>
+      </div>
 
-    <div class="tool-grid">
+      <div class="tool-grid">
+        <div
+          class="tool-card"
+          onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')"
+        >
+          <div class="icon blue">🚀</div>
 
-        <!-- Dashboard PRO MAX -->
-        <div class="tool-card"
-             onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')">
+          <div class="title">Dashboard PRO MAX</div>
 
-            <div class="icon blue">🚀</div>
-
-            <div class="title">
-                Dashboard PRO MAX
-            </div>
-
-            <div class="desc">
-                Production Dashboard
-            </div>
+          <div class="desc">Production Dashboard</div>
         </div>
 
-        <!-- Field Report Dashboard -->
-        <div class="tool-card"
-             onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')">
+        <div
+          class="tool-card"
+          onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')"
+        >
+          <div class="icon green">📋</div>
 
-            <div class="icon green">📋</div>
+          <div class="title">Field Report Dashboard</div>
 
-            <div class="title">
-                Field Report Dashboard
-            </div>
-
-            <div class="desc">
-                Report Management
-            </div>
+          <div class="desc">Report Management</div>
         </div>
 
+        <div
+          class="tool-card"
+          onclick="alert('เพิ่ม URL ระบบ Inventory ภายหลัง')"
+        >
+          <div class="icon orange">📦</div>
+
+          <div class="title">Inventory System</div>
+
+          <div class="desc">Stock Management</div>
+        </div>
+
+        <div
+          class="tool-card"
+          onclick="alert('เพิ่ม URL ระบบ Maintenance ภายหลัง')"
+        >
+          <div class="icon purple">🔧</div>
+
+          <div class="title">Maintenance System</div>
+
+          <div class="desc">PM & Breakdown</div>
+        </div>
+      </div>
     </div>
 
-</div>
+    <script>
+      function handleCredentialResponse(response) {
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
 
-<script>
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('launcher').style.display = 'block';
 
-function handleCredentialResponse(response){
+        document.getElementById('username').innerText = payload.name;
 
-    const payload =
-        JSON.parse(atob(response.credential.split('.')[1]));
+        document.getElementById('avatar').src = payload.picture;
 
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("launcher").style.display = "block";
+        localStorage.setItem('loginUser', JSON.stringify(payload));
+      }
 
-    document.getElementById("username").innerText =
-        payload.name;
+      function logout() {
+        localStorage.removeItem('loginUser');
+        location.reload();
+      }
 
-    document.getElementById("avatar").src =
-        payload.picture;
+      window.onload = function () {
+        const user = localStorage.getItem('loginUser');
 
-    localStorage.setItem(
-        "loginUser",
-        JSON.stringify(payload)
-    );
-}
+        if (user) {
+          const data = JSON.parse(user);
 
-function logout(){
+          document.getElementById('loginBox').style.display = 'none';
+          document.getElementById('launcher').style.display = 'block';
 
-    localStorage.removeItem("loginUser");
-    location.reload();
-}
+          document.getElementById('username').innerText = data.name;
 
-window.onload = function(){
-
-    const user =
-        localStorage.getItem("loginUser");
-
-    if(user){
-
-        const data = JSON.parse(user);
-
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("launcher").style.display = "block";
-
-        document.getElementById("username").innerText =
-            data.name;
-
-        document.getElementById("avatar").src =
-            data.picture;
-    }
-}
-
-</script>
-
-</body>
+          document.getElementById('avatar').src = data.picture;
+        }
+      };
+    </script>
+  </body>
 </html>
