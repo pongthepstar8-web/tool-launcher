@@ -539,7 +539,10 @@
       }
 
       function getRequestedTools(permission) {
-        if (!permission || !permission.requestTools) return [];
+        if (!permission || !permission.requestTools) {
+          return [];
+        }
+
         return String(permission.requestTools)
           .split(',')
           .map((x) => x.trim())
@@ -578,38 +581,58 @@
 
       function openRequestModal() {
         const permission = JSON.parse(localStorage.getItem('permission'));
+
         if (!permission) {
           alert('กรุณา Login ก่อนขออนุมัติ');
           return;
         }
+
         const btn = document.getElementById('requestBtn');
-        if (btn.disabled) return;
+
+        if (btn && btn.disabled) {
+          return;
+        }
 
         const requestedTools = getRequestedTools(permission);
+
         const list = document.getElementById('requestToolList');
+
         list.innerHTML = '';
 
         TOOL_LIST.forEach((tool) => {
+          const key = tool.permissionKey;
+
           const hasPermission =
-            permission.role === 'Admin' ||
-            permission[tool.permissionKey] === 'Y';
+            permission.role === 'Admin' || permission[key] === 'Y';
 
           const alreadyRequested =
             permission.requestStatus === 'Pending' &&
-            requestedTools.includes(tool.permissionKey);
-          const alreadyRequested = requestedTools.includes(tool.permissionKey);
+            requestedTools.includes(key);
+
           const item = document.createElement('label');
+
           item.className = 'request-item';
-          if (hasPermission) item.classList.add('approved');
-          if (alreadyRequested && !hasPermission)
+
+          if (hasPermission && !alreadyRequested) {
+            item.classList.add('approved');
+          }
+
+          if (alreadyRequested) {
             item.classList.add('requested');
-          item.innerHTML = `<span>${
-            tool.name
-          }</span><input type="checkbox" value="${tool.permissionKey}" ${
-            hasPermission || alreadyRequested ? 'disabled' : ''
-          }>`;
+          }
+
+          item.innerHTML = `
+      <span>${tool.name}</span>
+      <input
+        type="checkbox"
+        value="${key}"
+        ${hasPermission || alreadyRequested ? 'disabled' : ''}
+      >
+    `;
+
           list.appendChild(item);
         });
+
         document.getElementById('requestModal').style.display = 'flex';
       }
 
