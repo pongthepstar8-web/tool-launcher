@@ -155,12 +155,16 @@
         <div
           id="g_id_onload"
           data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
+          data-context="signin"
+          data-ux_mode="popup"
           data-callback="handleCredentialResponse"
+          data-auto_prompt="false"
         ></div>
 
         <div
           class="g_id_signin"
           data-type="standard"
+          data-shape="pill"
           data-theme="filled_blue"
           data-size="large"
         ></div>
@@ -184,9 +188,7 @@
           onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')"
         >
           <div class="icon blue">🚀</div>
-
           <div class="title">Dashboard PRO MAX</div>
-
           <div class="desc">Production Dashboard</div>
         </div>
 
@@ -195,9 +197,7 @@
           onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')"
         >
           <div class="icon green">📋</div>
-
           <div class="title">Field Report Dashboard</div>
-
           <div class="desc">Report Management</div>
         </div>
 
@@ -226,17 +226,6 @@
     </div>
 
     <script>
-      function handleCredentialResponse(response) {
-        console.log('LOGIN SUCCESS');
-
-        const payload = JSON.parse(
-          decodeURIComponent(escape(atob(response.credential.split('.')[1])))
-        );
-
-        localStorage.setItem('loginUser', JSON.stringify(payload));
-
-        showLauncher(payload);
-      }
       function handleCredentialResponse(response) {
         const payload = JSON.parse(
           decodeURIComponent(escape(atob(response.credential.split('.')[1])))
@@ -277,6 +266,7 @@
           showLauncher(JSON.parse(user));
         } else {
           document.getElementById('loginBox').style.display = 'block';
+
           document.getElementById('launcher').style.display = 'none';
         }
       };
