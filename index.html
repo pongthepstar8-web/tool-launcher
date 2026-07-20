@@ -44,12 +44,6 @@
         align-items: center;
       }
 
-      .user-box {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
       .user-box img {
         width: 40px;
         height: 40px;
@@ -160,6 +154,116 @@
         align-items: center;
         gap: 12px;
       }
+      #themeBtn {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 15px;
+      }
+
+      #themeBtn {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-right: 15px;
+      }
+
+      .dark {
+        background: #1f1f1f;
+        color: white;
+      }
+
+      .dark h1 {
+        color: white;
+      }
+
+      .dark .tool-card {
+        background: #2d2d2d;
+        color: white;
+      }
+
+      .dark .title {
+        color: white;
+      }
+
+      .dark .desc {
+        color: #cccccc;
+      }
+
+      .dark .login-card {
+        background: #2d2d2d;
+        color: white;
+      }
+
+      .dark #themeBtn {
+        background: #f5f5f5;
+        color: black;
+      }
+      body.dark {
+        background: #1f1f1f;
+        color: white;
+      }
+
+      body.dark h1 {
+        color: white;
+      }
+
+      body.dark .tool-card {
+        background: #2d2d2d;
+        color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      body.dark .desc {
+        color: #cccccc;
+      }
+
+      body.dark .login-card {
+        background: #2d2d2d;
+        color: white;
+      }
+
+      body.dark .user-box span {
+        color: white;
+      }
+
+      body.dark #themeBtn {
+        background: white;
+        color: black;
+      }
+      body.dark .icon {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+      }
+
+      body.dark .tool-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      }
+
+      body.dark .logout-btn {
+        background: #ff4d4f;
+      }
+
+      body.dark .logout-btn:hover {
+        background: #ff7875;
+      }
+      body {
+        background: #f4f6f9;
+        min-height: 100vh;
+        padding: 30px;
+        transition: all 0.3s ease;
+      }
+      .tool-card,
+      .login-card,
+      #themeBtn {
+        transition: all 0.3s ease;
+      }
     </style>
   </head>
 
@@ -193,11 +297,13 @@
 
     <div id="launcher">
       <div class="topbar">
-        <div id="googleBtn"></div>
+        <button id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
 
         <div class="user-box">
           <img id="avatar" alt="" />
+
           <span id="username"></span>
+
           <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
       </div>
@@ -296,7 +402,17 @@
       }
       window.onload = function () {
         const user = localStorage.getItem('loginUser');
+        const savedTheme = localStorage.getItem('theme');
 
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark');
+
+          const btn = document.getElementById('themeBtn');
+
+          if (btn) {
+            btn.innerHTML = '☀️ Light Mode';
+          }
+        }
         if (user) {
           showLauncher(JSON.parse(user));
         } else {
@@ -305,6 +421,21 @@
           document.getElementById('launcher').style.display = 'none';
         }
       };
+      function toggleTheme() {
+        document.body.classList.toggle('dark');
+
+        const btn = document.getElementById('themeBtn');
+
+        if (document.body.classList.contains('dark')) {
+          localStorage.setItem('theme', 'dark');
+
+          btn.textContent = '☀️ Light Mode';
+        } else {
+          localStorage.setItem('theme', 'light');
+
+          btn.textContent = '🌙 Dark Mode';
+        }
+      }
     </script>
   </body>
 </html>
