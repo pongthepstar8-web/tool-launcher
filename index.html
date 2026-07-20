@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<!-- saved from url=(0097)https://stackblitzstarterskfbzhgkr-kfa5-%2D8080-%2D87cf54cd.local-credentialless.webcontainer.io/ -->
+<html lang="th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Factory Tool Launcher</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:40px;
+    color:#333;
+}
+
+.tool-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:25px;
+    max-width:1000px;
+    margin:auto;
+}
+
+.tool-card{
+    background:#fff;
+    border-radius:20px;
+    padding:25px;
+    text-align:center;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow:0 4px 10px rgba(0,0,0,.1);
+}
+
+.tool-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 20px rgba(0,0,0,.15);
+}
+
+.icon{
+    width:90px;
+    height:90px;
+    margin:auto;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:42px;
+    color:white;
+    margin-bottom:15px;
+}
+
+.dashboard{
+    background:#0078D4;
+}
+
+.report{
+    background:#28A745;
+}
+
+.title{
+    font-size:18px;
+    font-weight:bold;
+    color:#333;
+}
+
+.desc{
+    margin-top:8px;
+    color:#666;
+    font-size:14px;
+}
+</style>
+</head>
+<body>
+
+<h1>🏭 Factory Tool Launcher</h1>
+
+<div class="tool-grid">
+
+    <!-- Dashboard PRO MAX -->
+    <div class="tool-card" onclick="window.open(&#39;https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/&#39;,&#39;_blank&#39;)">
+
+        <div class="icon dashboard">🚀</div>
+
+        <div class="title">
+            Dashboard PRO MAX
+        </div>
+
+        <div class="desc">
+            Production Dashboard
+        </div>
+
+    </div>
+
+    <!-- Field Report Dashboard -->
+    <div class="tool-card" onclick="window.open(&#39;https://pongthepstar8-web.github.io/Report-EDS-OSP/&#39;,&#39;_blank&#39;)">
+
+        <div class="icon report">📋</div>
+
+        <div class="title">
+            Field Report Dashboard
+        </div>
+
+        <div class="desc">
+            Report Management
+        </div>
+
+    </div>
+
+</div>
+
+
+
+      <script>
+        const source = new EventSource('/livereload');
+        const reload = () => location.reload(true);
+        source.onmessage = reload;
+        source.onerror = () => (source.onopen = reload);
+        console.log('[servor] listening for file changes');
+      </script>
+    </body></html>
