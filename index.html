@@ -352,6 +352,13 @@
     </div>
 
     <script>
+      function loadUsers(callback) {
+        const script = document.createElement('script');
+
+        script.src = API_URL + '?callback=' + callback;
+
+        document.body.appendChild(script);
+      }
       function showLauncher(data) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('launcher').style.display = 'block';
