@@ -355,6 +355,20 @@
       body.dark .request-item {
         background: #1f1f1f;
       }
+      .request-item.requested {
+        opacity: 0.45;
+        filter: grayscale(100%);
+        cursor: not-allowed;
+      }
+
+      .request-item.requested::after {
+        content: 'รออนุมัติ';
+        font-size: 12px;
+        background: #f59e0b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
     </style>
   </head>
 
@@ -604,11 +618,15 @@
 
         if (permission.status !== 'Approved') {
           tools.forEach((id) => lockTool(id));
+
+          updateRequestButton();
           return;
         }
 
         if (permission.role === 'Admin') {
           tools.forEach((id) => unlockTool(id));
+
+          updateRequestButton();
           return;
         }
 
@@ -754,16 +772,18 @@
           return;
         }
 
-        const hasAllTools =
-          permission.tool1 === 'Y' &&
-          permission.tool2 === 'Y' &&
-          permission.tool3 === 'Y' &&
-          permission.tool4 === 'Y';
+        const requestedTools = getRequestedTools(permission);
 
-        if (hasAllTools) {
+        const allToolsCovered = TOOL_LIST.every((tool) => {
+          const key = tool.permissionKey;
+
+          return permission[key] === 'Y' || requestedTools.includes(key);
+        });
+
+        if (allToolsCovered) {
           btn.classList.add('disabled');
           btn.disabled = true;
-          btn.innerText = '✅ ใช้งานครบแล้ว';
+          btn.innerText = '⏳ รอดำเนินการ';
         } else {
           btn.classList.remove('disabled');
           btn.disabled = false;
@@ -784,6 +804,8 @@
           return;
         }
 
+        const requestedTools = getRequestedTools(permission);
+
         const list = document.getElementById('requestToolList');
         list.innerHTML = '';
 
@@ -792,6 +814,8 @@
             permission.role === 'Admin' ||
             permission[tool.permissionKey] === 'Y';
 
+          const alreadyRequested = requestedTools.includes(tool.permissionKey);
+
           const item = document.createElement('label');
           item.className = 'request-item';
 
@@ -799,12 +823,16 @@
             item.classList.add('approved');
           }
 
+          if (alreadyRequested && !hasPermission) {
+            item.classList.add('requested');
+          }
+
           item.innerHTML = `
       <span>${tool.name}</span>
       <input
         type="checkbox"
         value="${tool.permissionKey}"
-        ${hasPermission ? 'disabled' : ''}
+        ${hasPermission || alreadyRequested ? 'disabled' : ''}
       >
     `;
 
@@ -862,11 +890,20 @@
         const permission = JSON.parse(localStorage.getItem('permission'));
 
         if (permission && result.tools) {
-          const requestedTools = result.tools.split(',');
+          const oldRequested = getRequestedTools(permission);
 
-          requestedTools.forEach((toolKey) => {
-            permission[toolKey] = 'P';
-          });
+          const newRequested = result.tools
+            .split(',')
+            .map((x) => x.trim())
+            .filter(Boolean);
+
+          const mergedRequested = Array.from(
+            new Set([...oldRequested, ...newRequested])
+          );
+
+          permission.requestTools = mergedRequested.join(',');
+
+          permission.requestStatus = 'Pending';
 
           localStorage.setItem('permission', JSON.stringify(permission));
         }
@@ -877,6 +914,16 @@
 
         showLauncher(user);
       };
+      function getRequestedTools(permission) {
+        if (!permission || !permission.requestTools) {
+          return [];
+        }
+
+        return String(permission.requestTools)
+          .split(',')
+          .map((x) => x.trim())
+          .filter(Boolean);
+      }
     </script>
     <div id="requestModal" class="modal">
       <div class="modal-box">
