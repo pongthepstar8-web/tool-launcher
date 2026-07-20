@@ -310,52 +310,84 @@
 
       <div class="tool-grid">
         <div
+          id="tool1"
           class="tool-card"
           onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')"
         >
           <div class="icon blue">🚀</div>
-
           <div class="title">Dashboard PRO MAX</div>
-
           <div class="desc">Production Dashboard</div>
         </div>
 
         <div
+          id="tool2"
           class="tool-card"
           onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')"
         >
           <div class="icon green">📋</div>
-
           <div class="title">Field Report Dashboard</div>
-
           <div class="desc">Report Management</div>
         </div>
 
         <div
+          id="tool3"
           class="tool-card"
           onclick="alert('เพิ่ม URL ระบบ Inventory ภายหลัง')"
         >
           <div class="icon orange">📦</div>
-
           <div class="title">Inventory System</div>
-
           <div class="desc">Stock Management</div>
         </div>
 
         <div
+          id="tool4"
           class="tool-card"
           onclick="alert('เพิ่ม URL ระบบ Maintenance ภายหลัง')"
         >
           <div class="icon purple">🔧</div>
-
           <div class="title">Maintenance System</div>
-
           <div class="desc">PM & Breakdown</div>
         </div>
       </div>
     </div>
 
     <script>
+      function showLauncher(data) {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('launcher').style.display = 'block';
+
+        document.getElementById('username').innerText = data.name || data.email;
+
+        document.getElementById('avatar').src = data.picture || '';
+
+        const permission = JSON.parse(localStorage.getItem('permission'));
+
+        if (!permission) {
+          return;
+        }
+
+        // Admin เห็นทุกระบบ
+        if (permission.role === 'Admin') {
+          return;
+        }
+
+        // User ทั่วไป
+        if (permission.tool1 !== 'Y') {
+          document.getElementById('tool1').style.display = 'none';
+        }
+
+        if (permission.tool2 !== 'Y') {
+          document.getElementById('tool2').style.display = 'none';
+        }
+
+        if (permission.tool3 !== 'Y') {
+          document.getElementById('tool3').style.display = 'none';
+        }
+
+        if (permission.tool4 !== 'Y') {
+          document.getElementById('tool4').style.display = 'none';
+        }
+      }
       function parseJwt(token) {
         const base64Url = token.split('.')[1];
 
@@ -375,20 +407,34 @@
       function handleCredentialResponse(response) {
         const payload = parseJwt(response.credential);
 
-        localStorage.setItem('loginUser', JSON.stringify(payload));
+        const API_URL =
+          'https://script.google.com/macros/s/AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ/exec';
 
-        showLauncher(payload);
-      }
+        fetch(API_URL)
+          .then((r) => r.json())
+          .then((users) => {
+            const user = users.find(
+              (x) => x.email.toLowerCase() === payload.email.toLowerCase()
+            );
 
-      function showLauncher(data) {
-        document.getElementById('loginBox').style.display = 'none';
+            if (!user) {
+              alert('ยังไม่มีสิทธิ์ใช้งาน กรุณารอผู้ดูแลอนุมัติ');
 
-        document.getElementById('launcher').style.display = 'block';
+              return;
+            }
 
-        document.getElementById('username').innerText =
-          data.name || data.email || 'User';
+            if (user.status !== 'Approved') {
+              alert('บัญชีนี้ยังไม่ได้รับอนุมัติ');
 
-        document.getElementById('avatar').src = data.picture || '';
+              return;
+            }
+
+            localStorage.setItem('loginUser', JSON.stringify(payload));
+
+            localStorage.setItem('permission', JSON.stringify(user));
+
+            showLauncher(payload);
+          });
       }
 
       function logout() {
