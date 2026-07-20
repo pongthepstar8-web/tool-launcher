@@ -228,6 +228,133 @@
       body.dark #requestBtn:hover {
         background: #2563eb;
       }
+      #requestBtn {
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      #requestBtn:hover {
+        background: #0b5ed7;
+      }
+
+      #requestBtn.disabled {
+        background: #999;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-box {
+        background: white;
+        width: 90%;
+        max-width: 480px;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      }
+
+      .modal-box h2 {
+        margin-bottom: 8px;
+      }
+
+      .modal-desc {
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      .request-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .request-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f4f6f9;
+        padding: 14px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+
+      .request-item input {
+        transform: scale(1.2);
+      }
+
+      .request-item.approved {
+        opacity: 0.45;
+        filter: grayscale(100%);
+        cursor: not-allowed;
+      }
+
+      .request-item.approved::after {
+        content: 'มีสิทธิ์แล้ว';
+        font-size: 12px;
+        background: #666;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+      }
+
+      .cancel-btn {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .submit-btn {
+        background: #198754;
+        color: white;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      body.dark #requestBtn {
+        background: #3b82f6;
+      }
+
+      body.dark #requestBtn.disabled {
+        background: #777;
+      }
+
+      body.dark .modal-box {
+        background: #2d2d2d;
+        color: white;
+      }
+
+      body.dark .modal-desc {
+        color: #ccc;
+      }
+
+      body.dark .request-item {
+        background: #1f1f1f;
+      }
     </style>
   </head>
 
@@ -262,7 +389,7 @@
       <div class="topbar">
         <button id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
 
-        <button id="requestBtn" onclick="manualRequestAccess()">
+        <button id="requestBtn" onclick="openRequestModal()">
           📝 ขออนุมัติใช้งาน
         </button>
 
@@ -500,6 +627,7 @@
         if (permission.tool4 !== 'Y') {
           lockTool('tool4');
         }
+        updateRequestButton();
       }
       function requestAccess(payload) {
         window.pendingPayload = payload;
@@ -589,6 +717,167 @@
           btn.textContent = '🌙 Dark Mode';
         }
       }
+      const TOOL_LIST = [
+        {
+          id: 'tool1',
+          permissionKey: 'tool1',
+          name: 'Dashboard PRO MAX',
+        },
+        {
+          id: 'tool2',
+          permissionKey: 'tool2',
+          name: 'Field Report Dashboard',
+        },
+        {
+          id: 'tool3',
+          permissionKey: 'tool3',
+          name: 'Inventory System',
+        },
+        {
+          id: 'tool4',
+          permissionKey: 'tool4',
+          name: 'Maintenance System',
+        },
+      ];
+      function updateRequestButton() {
+        const btn = document.getElementById('requestBtn');
+        const permission = JSON.parse(localStorage.getItem('permission'));
+
+        if (!btn || !permission) {
+          return;
+        }
+
+        if (permission.role === 'Admin') {
+          btn.classList.add('disabled');
+          btn.disabled = true;
+          btn.innerText = '✅ ใช้งานครบแล้ว';
+          return;
+        }
+
+        const hasAllTools =
+          permission.tool1 === 'Y' &&
+          permission.tool2 === 'Y' &&
+          permission.tool3 === 'Y' &&
+          permission.tool4 === 'Y';
+
+        if (hasAllTools) {
+          btn.classList.add('disabled');
+          btn.disabled = true;
+          btn.innerText = '✅ ใช้งานครบแล้ว';
+        } else {
+          btn.classList.remove('disabled');
+          btn.disabled = false;
+          btn.innerText = '📝 ขออนุมัติใช้งาน';
+        }
+      }
+      function openRequestModal() {
+        const permission = JSON.parse(localStorage.getItem('permission'));
+
+        if (!permission) {
+          alert('กรุณา Login ก่อนขออนุมัติ');
+          return;
+        }
+
+        const btn = document.getElementById('requestBtn');
+
+        if (btn.disabled) {
+          return;
+        }
+
+        const list = document.getElementById('requestToolList');
+        list.innerHTML = '';
+
+        TOOL_LIST.forEach((tool) => {
+          const hasPermission =
+            permission.role === 'Admin' ||
+            permission[tool.permissionKey] === 'Y';
+
+          const item = document.createElement('label');
+          item.className = 'request-item';
+
+          if (hasPermission) {
+            item.classList.add('approved');
+          }
+
+          item.innerHTML = `
+      <span>${tool.name}</span>
+      <input
+        type="checkbox"
+        value="${tool.permissionKey}"
+        ${hasPermission ? 'disabled' : ''}
+      >
+    `;
+
+          list.appendChild(item);
+        });
+
+        document.getElementById('requestModal').style.display = 'flex';
+      }
+      function closeRequestModal() {
+        document.getElementById('requestModal').style.display = 'none';
+      }
+      function submitToolRequest() {
+        const checked = document.querySelectorAll(
+          "#requestToolList input[type='checkbox']:checked"
+        );
+
+        if (checked.length === 0) {
+          alert('กรุณาเลือกระบบที่ต้องการขออนุมัติ');
+          return;
+        }
+
+        const tools = Array.from(checked).map((x) => x.value);
+
+        const user = JSON.parse(localStorage.getItem('loginUser'));
+
+        if (!user) {
+          alert('กรุณา Login ก่อนส่งคำขอ');
+          return;
+        }
+
+        const script = document.createElement('script');
+
+        script.src =
+          API_URL +
+          '?action=requestTools' +
+          '&email=' +
+          encodeURIComponent(user.email) +
+          '&name=' +
+          encodeURIComponent(user.name || '') +
+          '&tools=' +
+          encodeURIComponent(tools.join(',')) +
+          '&callback=requestToolsResult' +
+          '&t=' +
+          new Date().getTime();
+
+        document.body.appendChild(script);
+      }
+      window.requestToolsResult = function (result) {
+        console.log('Request tools result', result);
+
+        alert(
+          result.message || 'ส่งคำขออนุมัติเรียบร้อยแล้ว กรุณารอผู้ดูแลระบบ'
+        );
+
+        closeRequestModal();
+      };
     </script>
+    <div id="requestModal" class="modal">
+      <div class="modal-box">
+        <h2>📝 ขออนุมัติใช้งานระบบ</h2>
+        <p class="modal-desc">เลือกระบบที่ต้องการขอสิทธิ์ใช้งาน</p>
+
+        <div id="requestToolList" class="request-list"></div>
+
+        <div class="modal-actions">
+          <button class="cancel-btn" onclick="closeRequestModal()">
+            ยกเลิก
+          </button>
+          <button class="submit-btn" onclick="submitToolRequest()">
+            ส่งคำขอ
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
