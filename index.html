@@ -480,27 +480,59 @@
       function showLauncher(data) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('launcher').style.display = 'block';
+
         document.getElementById('username').innerText =
           data.name || data.email || 'User';
+
         document.getElementById('avatar').src = data.picture || '';
 
         const permission = JSON.parse(localStorage.getItem('permission'));
-        TOOL_LIST.forEach((tool) => unlockTool(tool.id));
 
-        if (!permission || permission.status !== 'Approved') {
-          TOOL_LIST.forEach((tool) => lockTool(tool.id));
+        TOOL_LIST.forEach((tool) => {
+          unlockTool(tool.id);
+        });
+
+        if (!permission) {
+          TOOL_LIST.forEach((tool) => {
+            lockTool(tool.id);
+          });
+
+          updateRequestButton();
+          return;
+        }
+
+        const requestedTools = getRequestedTools(permission);
+
+        if (permission.status !== 'Approved') {
+          TOOL_LIST.forEach((tool) => {
+            lockTool(tool.id);
+          });
+
           updateRequestButton();
           return;
         }
 
         if (permission.role === 'Admin') {
-          TOOL_LIST.forEach((tool) => unlockTool(tool.id));
+          TOOL_LIST.forEach((tool) => {
+            unlockTool(tool.id);
+          });
+
           updateRequestButton();
           return;
         }
 
         TOOL_LIST.forEach((tool) => {
-          if (permission[tool.permissionKey] !== 'Y') lockTool(tool.id);
+          const key = tool.permissionKey;
+
+          const isApproved = permission[key] === 'Y';
+
+          const isPendingRequest =
+            permission.requestStatus === 'Pending' &&
+            requestedTools.includes(key);
+
+          if (!isApproved || isPendingRequest) {
+            lockTool(tool.id);
+          }
         });
 
         updateRequestButton();
@@ -561,6 +593,10 @@
           const hasPermission =
             permission.role === 'Admin' ||
             permission[tool.permissionKey] === 'Y';
+
+          const alreadyRequested =
+            permission.requestStatus === 'Pending' &&
+            requestedTools.includes(tool.permissionKey);
           const alreadyRequested = requestedTools.includes(tool.permissionKey);
           const item = document.createElement('label');
           item.className = 'request-item';
