@@ -416,10 +416,10 @@
 
       <div class="tool-grid">
         <div
-          id="tool1"
+          id="DashboardPROMAX"
           class="tool-card"
           data-url="https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/"
-          onclick="openTool('tool1')"
+          onclick="openTool('DashboardPROMAX')"
         >
           <div class="icon blue">🚀</div>
           <div class="title">Dashboard PRO MAX</div>
@@ -427,10 +427,10 @@
         </div>
 
         <div
-          id="tool2"
+          id="FieldReportDashboard"
           class="tool-card"
           data-url="https://pongthepstar8-web.github.io/Report-EDS-OSP/"
-          onclick="openTool('tool2')"
+          onclick="openTool('FieldReportDashboard')"
         >
           <div class="icon green">📋</div>
           <div class="title">Field Report Dashboard</div>
@@ -438,10 +438,10 @@
         </div>
 
         <div
-          id="tool3"
+          id="InventorySystem"
           class="tool-card"
           data-url=""
-          onclick="openTool('tool3')"
+          onclick="openTool('InventorySystem')"
         >
           <div class="icon orange">📦</div>
           <div class="title">Inventory System</div>
@@ -449,10 +449,10 @@
         </div>
 
         <div
-          id="tool4"
+          id="MaintenanceSystem"
           class="tool-card"
           data-url=""
-          onclick="openTool('tool4')"
+          onclick="openTool('MaintenanceSystem')"
         >
           <div class="icon purple">🔧</div>
           <div class="title">Maintenance System</div>
@@ -624,27 +624,17 @@
         }
 
         if (permission.role === 'Admin') {
-          tools.forEach((id) => unlockTool(id));
-
+          TOOL_LIST.forEach((tool) => unlockTool(tool.id));
           updateRequestButton();
           return;
         }
 
-        if (permission.tool1 !== 'Y') {
-          lockTool('tool1');
-        }
+        TOOL_LIST.forEach((tool) => {
+          if (permission[tool.permissionKey] !== 'Y') {
+            lockTool(tool.id);
+          }
+        });
 
-        if (permission.tool2 !== 'Y') {
-          lockTool('tool2');
-        }
-
-        if (permission.tool3 !== 'Y') {
-          lockTool('tool3');
-        }
-
-        if (permission.tool4 !== 'Y') {
-          lockTool('tool4');
-        }
         updateRequestButton();
       }
       function requestAccess(payload) {
@@ -737,23 +727,23 @@
       }
       const TOOL_LIST = [
         {
-          id: 'tool1',
-          permissionKey: 'tool1',
+          id: 'DashboardPROMAX',
+          permissionKey: 'DashboardPROMAX',
           name: 'Dashboard PRO MAX',
         },
         {
-          id: 'tool2',
-          permissionKey: 'tool2',
+          id: 'FieldReportDashboard',
+          permissionKey: 'FieldReportDashboard',
           name: 'Field Report Dashboard',
         },
         {
-          id: 'tool3',
-          permissionKey: 'tool3',
+          id: 'InventorySystem',
+          permissionKey: 'InventorySystem',
           name: 'Inventory System',
         },
         {
-          id: 'tool4',
-          permissionKey: 'tool4',
+          id: 'MaintenanceSystem',
+          permissionKey: 'MaintenanceSystem',
           name: 'Maintenance System',
         },
       ];
@@ -765,6 +755,7 @@
           return;
         }
 
+        // Admin ใช้ได้ทุกระบบ ไม่ต้องขออนุมัติ
         if (permission.role === 'Admin') {
           btn.classList.add('disabled');
           btn.disabled = true;
@@ -772,14 +763,20 @@
           return;
         }
 
+        // อ่านรายการที่เคยส่งคำขอไปแล้วจาก RequestTools
         const requestedTools = getRequestedTools(permission);
 
+        // เช็กว่า Tool ทั้งหมด:
+        // 1. มีสิทธิ์แล้ว = Y
+        // หรือ
+        // 2. เคยส่งคำขอแล้ว
         const allToolsCovered = TOOL_LIST.every((tool) => {
           const key = tool.permissionKey;
 
           return permission[key] === 'Y' || requestedTools.includes(key);
         });
 
+        // ถ้ามีสิทธิ์ครบ หรือขอครบหมดแล้ว ให้ปุ่มเป็นสีเทา
         if (allToolsCovered) {
           btn.classList.add('disabled');
           btn.disabled = true;
