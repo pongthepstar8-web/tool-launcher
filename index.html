@@ -435,10 +435,13 @@
         localStorage.setItem('loginUser', JSON.stringify(payload));
 
         localStorage.setItem('permission', JSON.stringify(user));
-
+        console.log('Permission OK');
+        console.log(user);
         showLauncher(payload);
       }
       function handleCredentialResponse(response) {
+        console.log('Google Login Success');
+        console.log(payload);
         const payload = parseJwt(response.credential);
 
         window.googlePayload = payload;
