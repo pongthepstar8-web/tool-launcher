@@ -248,7 +248,7 @@
       }
 
       function logout() {
-        localStorage.removeItem('loginUser');
+        localStorage.clear();
 
         if (window.google) {
           google.accounts.id.disableAutoSelect();
@@ -257,11 +257,18 @@
         document.getElementById('launcher').style.display = 'none';
         document.getElementById('loginBox').style.display = 'block';
 
-        document.getElementById('username').innerText = '';
-        document.getElementById('avatar').src = '';
-
-        location.href = location.pathname;
+        location.reload();
       }
+      window.onload = function () {
+        const user = localStorage.getItem('loginUser');
+
+        if (user) {
+          showLauncher(JSON.parse(user));
+        } else {
+          document.getElementById('loginBox').style.display = 'block';
+          document.getElementById('launcher').style.display = 'none';
+        }
+      };
     </script>
   </body>
 </html>
