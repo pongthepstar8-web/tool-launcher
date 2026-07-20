@@ -354,7 +354,7 @@
         console.log('Matched user', user);
 
         if (!user) {
-          alert('ยังไม่มีสิทธิ์ใช้งาน กรุณารอผู้ดูแลอนุมัติ');
+          requestAccess(payload);
           return;
         }
 
@@ -424,19 +424,16 @@
           return;
         }
 
-        // ถ้ารออนุมัติ ให้ทุก Tool เป็นสีเทา
         if (permission.status !== 'Approved') {
           tools.forEach((id) => lockTool(id));
           return;
         }
 
-        // Admin ใช้ได้ทั้งหมด
         if (permission.role === 'Admin') {
           tools.forEach((id) => unlockTool(id));
           return;
         }
 
-        // User ใช้ได้ตาม Tool1-Tool4
         if (permission.tool1 !== 'Y') {
           lockTool('tool1');
         }
@@ -453,7 +450,47 @@
           lockTool('tool4');
         }
       }
+      function requestAccess(payload) {
+        window.pendingPayload = payload;
 
+        const script = document.createElement('script');
+
+        script.src =
+          API_URL +
+          '?action=request' +
+          '&email=' +
+          encodeURIComponent(payload.email) +
+          '&name=' +
+          encodeURIComponent(payload.name || '') +
+          '&callback=requestAccessResult' +
+          '&t=' +
+          new Date().getTime();
+
+        document.body.appendChild(script);
+      }
+
+      window.requestAccessResult = function (result) {
+        console.log('Request result', result);
+
+        alert(result.message || 'ส่งคำขอใช้งานแล้ว กรุณารอผู้ดูแลอนุมัติ');
+
+        const payload = window.pendingPayload;
+
+        const pendingPermission = {
+          email: payload.email,
+          role: 'User',
+          status: 'Pending',
+          tool1: 'N',
+          tool2: 'N',
+          tool3: 'N',
+          tool4: 'N',
+        };
+
+        localStorage.setItem('loginUser', JSON.stringify(payload));
+        localStorage.setItem('permission', JSON.stringify(pendingPermission));
+
+        showLauncher(payload);
+      };
       function logout() {
         localStorage.clear();
 
