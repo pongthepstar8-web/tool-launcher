@@ -352,6 +352,8 @@
     </div>
 
     <script>
+      const API_URL =
+        'https://script.google.com/macros/s/AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ/exec';
       function loadUsers(callback) {
         const script = document.createElement('script');
 
@@ -411,37 +413,41 @@
           )
         );
       }
+      function processUsers(users) {
+        const payload = window.googlePayload;
+
+        const user = users.find(
+          (x) => x.email.toLowerCase() === payload.email.toLowerCase()
+        );
+
+        if (!user) {
+          alert('ยังไม่มีสิทธิ์ใช้งาน');
+
+          return;
+        }
+
+        if (user.status !== 'Approved') {
+          alert('บัญชีนี้ยังไม่ได้รับอนุมัติ');
+
+          return;
+        }
+
+        localStorage.setItem('loginUser', JSON.stringify(payload));
+
+        localStorage.setItem('permission', JSON.stringify(user));
+
+        showLauncher(payload);
+      }
       function handleCredentialResponse(response) {
         const payload = parseJwt(response.credential);
 
-        const API_URL =
-          'https://script.google.com/macros/s/AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ/exec';
+        window.googlePayload = payload;
 
-        fetch(API_URL)
-          .then((r) => r.json())
-          .then((users) => {
-            const user = users.find(
-              (x) => x.email.toLowerCase() === payload.email.toLowerCase()
-            );
+        const script = document.createElement('script');
 
-            if (!user) {
-              alert('ยังไม่มีสิทธิ์ใช้งาน กรุณารอผู้ดูแลอนุมัติ');
+        script.src = API_URL + '?callback=processUsers';
 
-              return;
-            }
-
-            if (user.status !== 'Approved') {
-              alert('บัญชีนี้ยังไม่ได้รับอนุมัติ');
-
-              return;
-            }
-
-            localStorage.setItem('loginUser', JSON.stringify(payload));
-
-            localStorage.setItem('permission', JSON.stringify(user));
-
-            showLauncher(payload);
-          });
+        document.body.appendChild(script);
       }
 
       function logout() {
