@@ -36,21 +36,28 @@
         display: none;
       }
 
-      .profile {
+      .topbar {
+        max-width: 1200px;
+        margin: 0 auto 30px auto;
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
       }
 
-      .profile img {
+      .user-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .user-box img {
         width: 40px;
         height: 40px;
         border-radius: 50%;
+        object-fit: cover;
       }
 
-      .profile button {
+      .logout-btn {
         background: #dc3545;
         color: white;
         border: none;
@@ -120,35 +127,55 @@
         color: #666;
         margin-top: 8px;
       }
+      #loginBox {
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      .login-card {
+        background: white;
+        max-width: 400px;
+        margin: auto;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
     </style>
   </head>
 
   <body>
     <h1>🏭 Factory Tool Launcher</h1>
 
-    <div id="loginBox" style="display: block">
-      <h2>Login ด้วย Gmail</h2>
-      <br />
+    <div id="loginBox">
+      <div class="login-card">
+        <h2>🔐 Login ด้วย Google</h2>
 
-      <div
-        id="g_id_onload"
-        data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse"
-      ></div>
+        <br />
 
-      <div
-        class="g_id_signin"
-        data-type="standard"
-        data-theme="outline"
-        data-size="large"
-      ></div>
+        <div
+          id="g_id_onload"
+          data-client_id="1044067230852-207pud3phh099ps6uq14dn770ce16alf.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse"
+        ></div>
+
+        <div
+          class="g_id_signin"
+          data-type="standard"
+          data-theme="filled_blue"
+          data-size="large"
+        ></div>
+      </div>
     </div>
 
-    <div id="launcher" style="display: block">
-      <div class="profile">
-        <img id="avatar" alt="" />
-        <span id="username"></span>
-        <button onclick="logout()">Logout</button>
+    <div id="launcher">
+      <div class="topbar">
+        <div id="googleBtn"></div>
+
+        <div class="user-box">
+          <img id="avatar" alt="" />
+          <span id="username"></span>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
       </div>
 
       <div class="tool-grid">
@@ -214,8 +241,8 @@
 
         document.getElementById('launcher').style.display = 'block';
 
-        document.getElementById('username').textContent =
-          data.name || data.email;
+        document.getElementById('username').innerText =
+          data.name || data.email || 'User';
 
         document.getElementById('avatar').src = data.picture || '';
       }
@@ -223,16 +250,18 @@
       function logout() {
         localStorage.removeItem('loginUser');
 
-        location.reload();
-      }
-
-      window.onload = function () {
-        const user = localStorage.getItem('loginUser');
-
-        if (user) {
-          showLauncher(JSON.parse(user));
+        if (window.google) {
+          google.accounts.id.disableAutoSelect();
         }
-      };
+
+        document.getElementById('launcher').style.display = 'none';
+        document.getElementById('loginBox').style.display = 'block';
+
+        document.getElementById('username').innerText = '';
+        document.getElementById('avatar').src = '';
+
+        location.href = location.pathname;
+      }
     </script>
   </body>
 </html>
