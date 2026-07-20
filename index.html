@@ -134,16 +134,22 @@
 
     window.handleCredentialResponse = function(response) {
       const payload = parseJwt(response.credential);
+      console.log("Google Login Success", payload);
       window.googlePayload = payload;
+      const jsonpUrl = API_URL + "?callback=processUsers&t=" + new Date().getTime();
+      console.log("Loading Apps Script:", jsonpUrl);
       const script = document.createElement("script");
-      script.src = API_URL + "?callback=processUsers&t=" + new Date().getTime();
-      script.onerror = function() { alert("โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ"); };
+      script.src = jsonpUrl;
+      script.onload = function() { console.log("Apps Script loaded"); };
+      script.onerror = function() { console.error("Apps Script load failed:", jsonpUrl); alert("โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ"); };
       document.body.appendChild(script);
     };
 
     window.processUsers = function(users) {
       const payload = window.googlePayload;
+      console.log("Users from Sheet", users);
       const user = users.find(x => String(x.email).toLowerCase() === String(payload.email).toLowerCase());
+      console.log("Matched user", user);
       if (!user) {
         const ask = confirm("ยังไม่มีสิทธิ์ใช้งาน ต้องการส่งคำขออนุมัติหรือไม่?");
         if (ask) requestAccess(payload);
@@ -207,7 +213,7 @@
 
       const allToolsCovered = TOOL_LIST.every(tool => {
         const status = normalizeStatus(permission[tool.permissionKey]);
-        return status === "Approved" || status === "Pending";
+        return status === "Approved" || status === "Pending" || status === "Denied";
       });
 
       if (allToolsCovered) {
@@ -252,11 +258,13 @@
       const user = JSON.parse(localStorage.getItem("loginUser"));
       if (!user) { alert("กรุณา Login ก่อนส่งคำขอ"); return; }
       const script = document.createElement("script");
-      script.src = API_URL + "?action=requestTools" +
+      const jsonpUrl = API_URL + "?action=requestTools" +
         "&email=" + encodeURIComponent(user.email) +
         "&name=" + encodeURIComponent(user.name || "") +
         "&tools=" + encodeURIComponent(tools.join(",")) +
         "&callback=requestToolsResult&t=" + new Date().getTime();
+      console.log("Request tools URL:", jsonpUrl);
+      script.src = jsonpUrl;
       document.body.appendChild(script);
     }
 
