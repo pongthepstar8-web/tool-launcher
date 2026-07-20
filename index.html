@@ -178,6 +178,34 @@
       body.dark .logout-btn {
         background: #ff4d4f;
       }
+      .tool-card.locked {
+        opacity: 0.45;
+        filter: grayscale(100%);
+        cursor: not-allowed;
+        position: relative;
+      }
+
+      .tool-card.locked:hover {
+        transform: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .tool-card.locked::after {
+        content: '🔒 รออนุมัติ';
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #666;
+        color: white;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
+
+      body.dark .tool-card.locked {
+        opacity: 0.4;
+        filter: grayscale(100%);
+      }
     </style>
   </head>
 
@@ -223,7 +251,8 @@
         <div
           id="tool1"
           class="tool-card"
-          onclick="window.open('https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/','_blank')"
+          data-url="https://pongthepstar8-web.github.io/Dashboard-PRO-MAX/"
+          onclick="openTool('tool1')"
         >
           <div class="icon blue">🚀</div>
           <div class="title">Dashboard PRO MAX</div>
@@ -233,7 +262,8 @@
         <div
           id="tool2"
           class="tool-card"
-          onclick="window.open('https://pongthepstar8-web.github.io/Report-EDS-OSP/','_blank')"
+          data-url="https://pongthepstar8-web.github.io/Report-EDS-OSP/"
+          onclick="openTool('tool2')"
         >
           <div class="icon green">📋</div>
           <div class="title">Field Report Dashboard</div>
@@ -243,7 +273,8 @@
         <div
           id="tool3"
           class="tool-card"
-          onclick="alert('ยังไม่ได้ตั้งค่า URL ระบบ Inventory')"
+          data-url=""
+          onclick="openTool('tool3')"
         >
           <div class="icon orange">📦</div>
           <div class="title">Inventory System</div>
@@ -253,7 +284,8 @@
         <div
           id="tool4"
           class="tool-card"
-          onclick="alert('ยังไม่ได้ตั้งค่า URL ระบบ Maintenance')"
+          data-url=""
+          onclick="openTool('tool4')"
         >
           <div class="icon purple">🔧</div>
           <div class="title">Maintenance System</div>
@@ -327,7 +359,12 @@
         }
 
         if (user.status !== 'Approved') {
-          alert('บัญชีนี้ยังไม่ได้รับอนุมัติ');
+          localStorage.setItem('loginUser', JSON.stringify(payload));
+          localStorage.setItem('permission', JSON.stringify(user));
+
+          alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
+
+          showLauncher(payload);
           return;
         }
 
@@ -338,7 +375,33 @@
 
         showLauncher(payload);
       };
+      function openTool(toolId) {
+        const card = document.getElementById(toolId);
 
+        if (card.classList.contains('locked')) {
+          alert('ระบบนี้ยังไม่ได้รับอนุมัติ กรุณาติดต่อผู้ดูแลระบบ');
+          return;
+        }
+
+        const url = card.getAttribute('data-url');
+
+        if (!url) {
+          alert('ยังไม่ได้ตั้งค่า URL ของระบบนี้');
+          return;
+        }
+
+        window.open(url, '_blank');
+      }
+
+      function lockTool(toolId) {
+        const card = document.getElementById(toolId);
+        card.classList.add('locked');
+      }
+
+      function unlockTool(toolId) {
+        const card = document.getElementById(toolId);
+        card.classList.remove('locked');
+      }
       function showLauncher(data) {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('launcher').style.display = 'block';
@@ -348,35 +411,46 @@
 
         document.getElementById('avatar').src = data.picture || '';
 
-        document.getElementById('tool1').style.display = 'block';
-        document.getElementById('tool2').style.display = 'block';
-        document.getElementById('tool3').style.display = 'block';
-        document.getElementById('tool4').style.display = 'block';
+        const tools = ['tool1', 'tool2', 'tool3', 'tool4'];
+
+        tools.forEach((id) => {
+          unlockTool(id);
+        });
 
         const permission = JSON.parse(localStorage.getItem('permission'));
 
         if (!permission) {
+          tools.forEach((id) => lockTool(id));
           return;
         }
 
+        // ถ้ารออนุมัติ ให้ทุก Tool เป็นสีเทา
+        if (permission.status !== 'Approved') {
+          tools.forEach((id) => lockTool(id));
+          return;
+        }
+
+        // Admin ใช้ได้ทั้งหมด
         if (permission.role === 'Admin') {
+          tools.forEach((id) => unlockTool(id));
           return;
         }
 
+        // User ใช้ได้ตาม Tool1-Tool4
         if (permission.tool1 !== 'Y') {
-          document.getElementById('tool1').style.display = 'none';
+          lockTool('tool1');
         }
 
         if (permission.tool2 !== 'Y') {
-          document.getElementById('tool2').style.display = 'none';
+          lockTool('tool2');
         }
 
         if (permission.tool3 !== 'Y') {
-          document.getElementById('tool3').style.display = 'none';
+          lockTool('tool3');
         }
 
         if (permission.tool4 !== 'Y') {
-          document.getElementById('tool4').style.display = 'none';
+          lockTool('tool4');
         }
       }
 
