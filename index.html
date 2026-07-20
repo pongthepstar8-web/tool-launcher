@@ -462,465 +462,505 @@
     </div>
 
     <script>
-      const API_URL =
-        'https://script.google.com/macros/s/' +
-        'AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ' +
-        '/exec';
+                        const API_URL =
+                          'https://script.google.com/macros/s/' +
+                          'AKfycbxYXypze1Uxcake8YZG8cLhoirie5Ceb4c7UwMSyqDKRsCPtuVme9PqyUREGBin6JbOGQ' +
+                          '/exec';
 
-      function parseJwt(token) {
-        const base64Url = token.split('.')[1];
+                        function parseJwt(token) {
+                          const base64Url = token.split('.')[1];
 
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
 
-        return JSON.parse(
-          decodeURIComponent(
-            atob(base64)
-              .split('')
-              .map(function (c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-              })
-              .join('')
-          )
-        );
-      }
+                          return JSON.parse(
+                            decodeURIComponent(
+                              atob(base64)
+                                .split('')
+                                .map(function (c) {
+                                  return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                                })
+                                .join('')
+                            )
+                          );
+                        }
 
-      window.handleCredentialResponse = function (response) {
-        const payload = parseJwt(response.credential);
+                        window.handleCredentialResponse = function (response) {
+                          const payload = parseJwt(response.credential);
 
-        console.log('Google Login Success', payload);
+                          console.log('Google Login Success', payload);
 
-        window.googlePayload = payload;
+                          window.googlePayload = payload;
 
-        const script = document.createElement('script');
-        script.src =
-          API_URL + '?callback=processUsers&t=' + new Date().getTime();
+                          const script = document.createElement('script');
+                          script.src =
+                            API_URL + '?callback=processUsers&t=' + new Date().getTime();
 
-        script.onload = function () {
-          console.log('Apps Script loaded');
-        };
+                          script.onload = function () {
+                            console.log('Apps Script loaded');
+                          };
 
-        script.onerror = function () {
-          console.error('Apps Script load failed');
-          alert('โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ');
-        };
+                          script.onerror = function () {
+                            console.error('Apps Script load failed');
+                            alert('โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ');
+                          };
 
-        document.body.appendChild(script);
-      };
+                          document.body.appendChild(script);
+                        };
 
-      window.processUsers = function (users) {
-        const payload = window.googlePayload;
+                        window.processUsers = function (users) {
+                          const payload = window.googlePayload;
 
-        console.log('Users from Sheet', users);
+                          console.log('Users from Sheet', users);
 
-        const user = users.find(
-          (x) =>
-            String(x.email).toLowerCase() ===
-            String(payload.email).toLowerCase()
-        );
+                          const user = users.find(
+                            (x) =>
+                              String(x.email).toLowerCase() ===
+                              String(payload.email).toLowerCase()
+                          );
 
-        console.log('Matched user', user);
+                          console.log('Matched user', user);
 
-        if (!user) {
-          const ask = confirm(
-            'ยังไม่มีสิทธิ์ใช้งาน ต้องการส่งคำขออนุมัติหรือไม่?'
-          );
+                          if (!user) {
+                            const ask = confirm(
+                              'ยังไม่มีสิทธิ์ใช้งาน ต้องการส่งคำขออนุมัติหรือไม่?'
+                            );
 
-          if (ask) {
-            requestAccess(payload);
-          }
+                            if (ask) {
+                              requestAccess(payload);
+                            }
 
-          return;
-        }
+                            return;
+                          }
 
-        if (user.status !== 'Approved') {
-          localStorage.setItem('loginUser', JSON.stringify(payload));
-          localStorage.setItem('permission', JSON.stringify(user));
+                          if (user.status !== 'Approved') {
+                            localStorage.setItem('loginUser', JSON.stringify(payload));
+                            localStorage.setItem('permission', JSON.stringify(user));
 
-          alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
+                            alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
 
-          showLauncher(payload);
-          return;
-        }
+                            showLauncher(payload);
+                            return;
+                          }
 
-        localStorage.setItem('loginUser', JSON.stringify(payload));
-        localStorage.setItem('permission', JSON.stringify(user));
+                          localStorage.setItem('loginUser', JSON.stringify(payload));
+                          localStorage.setItem('permission', JSON.stringify(user));
 
-        console.log('Permission OK', user);
+                          console.log('Permission OK', user);
 
-        showLauncher(payload);
-      };
-      function manualRequestAccess() {
-        const user = localStorage.getItem('loginUser');
+                          showLauncher(payload);
+                        };
+                        function manualRequestAccess() {
+                          const user = localStorage.getItem('loginUser');
 
-        if (!user) {
-          alert('กรุณา Login ด้วย Google ก่อนขออนุมัติ');
-          return;
-        }
+                          if (!user) {
+                            alert('กรุณา Login ด้วย Google ก่อนขออนุมัติ');
+                            return;
+                          }
 
-        const payload = JSON.parse(user);
+                          const payload = JSON.parse(user);
 
-        const confirmRequest = confirm('ต้องการส่งคำขออนุมัติใช้งานหรือไม่?');
+                          const confirmRequest = confirm('ต้องการส่งคำขออนุมัติใช้งานหรือไม่?');
 
-        if (!confirmRequest) {
-          return;
-        }
+                          if (!confirmRequest) {
+                            return;
+                          }
 
-        requestAccess(payload);
-      }
-      function openTool(toolId) {
+                          requestAccess(payload);
+                        }
+                        function openTool(toolId) {
         const card = document.getElementById(toolId);
 
-        if (card.classList.contains('locked')) {
-          alert('ระบบนี้รออนุมัติ กรุณาติดต่อผู้ดูแลระบบ');
+        if (!card) {
+          alert("ไม่พบระบบนี้");
           return;
         }
 
-        const url = card.getAttribute('data-url');
+        if (card.classList.contains("locked")) {
+          alert("ระบบนี้รออนุมัติ กรุณาติดต่อผู้ดูแลระบบ");
+          return;
+        }
+
+        const url = card.getAttribute("data-url");
 
         if (!url) {
-          alert('ยังไม่ได้ตั้งค่า URL ของระบบนี้');
+          alert("ยังไม่ได้ตั้งค่า URL ของระบบนี้");
           return;
         }
 
-        window.open(url, '_blank');
+        window.open(url, "_blank");
       }
-
-      function lockTool(toolId) {
-        const card = document.getElementById(toolId);
-        card.classList.add('locked');
-      }
-
-      function unlockTool(toolId) {
-        const card = document.getElementById(toolId);
-        card.classList.remove('locked');
-      }
-      function showLauncher(data) {
-        document.getElementById('loginBox').style.display = 'none';
-        document.getElementById('launcher').style.display = 'block';
-
-        document.getElementById('username').innerText =
-          data.name || data.email || 'User';
-
-        document.getElementById('avatar').src = data.picture || '';
-
-        const tools = ['tool1', 'tool2', 'tool3', 'tool4'];
-
-        tools.forEach((id) => {
-          unlockTool(id);
-        });
-
-        const permission = JSON.parse(localStorage.getItem('permission'));
-
-        if (!permission) {
-          tools.forEach((id) => lockTool(id));
-          return;
-        }
-
-        if (permission.status !== 'Approved') {
-          tools.forEach((id) => lockTool(id));
-
-          updateRequestButton();
-          return;
-        }
-
-        if (permission.role === 'Admin') {
-          TOOL_LIST.forEach((tool) => unlockTool(tool.id));
-          updateRequestButton();
-          return;
-        }
-
-        TOOL_LIST.forEach((tool) => {
-          if (permission[tool.permissionKey] !== 'Y') {
-            lockTool(tool.id);
-          }
-        });
-
-        updateRequestButton();
-      }
-      function requestAccess(payload) {
-        window.pendingPayload = payload;
-
-        const script = document.createElement('script');
-
-        script.src =
-          API_URL +
-          '?action=request' +
-          '&email=' +
-          encodeURIComponent(payload.email) +
-          '&name=' +
-          encodeURIComponent(payload.name || '') +
-          '&callback=requestAccessResult' +
-          '&t=' +
-          new Date().getTime();
-
-        document.body.appendChild(script);
-      }
-
-      window.requestAccessResult = function (result) {
-        console.log('Request result', result);
-
-        alert(result.message || 'ส่งคำขอใช้งานแล้ว กรุณารอผู้ดูแลอนุมัติ');
-
-        const payload = window.pendingPayload;
-
-        const pendingPermission = {
-          email: payload.email,
-          role: 'User',
-          status: 'Pending',
-          tool1: 'N',
-          tool2: 'N',
-          tool3: 'N',
-          tool4: 'N',
-        };
-
-        localStorage.setItem('loginUser', JSON.stringify(payload));
-
-        localStorage.setItem('permission', JSON.stringify(pendingPermission));
-
-        showLauncher(payload);
-      };
-      function logout() {
-        localStorage.clear();
-
-        if (window.google) {
-          google.accounts.id.disableAutoSelect();
-        }
-
-        location.reload();
-      }
-
-      window.onload = function () {
-        const user = localStorage.getItem('loginUser');
-        const permission = localStorage.getItem('permission');
-        const savedTheme = localStorage.getItem('theme');
-
-        if (savedTheme === 'dark') {
-          document.body.classList.add('dark');
-
-          const btn = document.getElementById('themeBtn');
-
-          if (btn) {
-            btn.innerHTML = '☀️ Light Mode';
-          }
-        }
-
-        if (user && permission) {
-          showLauncher(JSON.parse(user));
-        } else {
-          document.getElementById('loginBox').style.display = 'block';
-          document.getElementById('launcher').style.display = 'none';
-        }
-      };
-
-      function toggleTheme() {
-        document.body.classList.toggle('dark');
-
-        const btn = document.getElementById('themeBtn');
-
-        if (document.body.classList.contains('dark')) {
-          localStorage.setItem('theme', 'dark');
-          btn.textContent = '☀️ Light Mode';
-        } else {
-          localStorage.setItem('theme', 'light');
-          btn.textContent = '🌙 Dark Mode';
-        }
-      }
-      const TOOL_LIST = [
-        {
-          id: 'DashboardPROMAX',
-          permissionKey: 'DashboardPROMAX',
-          name: 'Dashboard PRO MAX',
-        },
-        {
-          id: 'FieldReportDashboard',
-          permissionKey: 'FieldReportDashboard',
-          name: 'Field Report Dashboard',
-        },
-        {
-          id: 'InventorySystem',
-          permissionKey: 'InventorySystem',
-          name: 'Inventory System',
-        },
-        {
-          id: 'MaintenanceSystem',
-          permissionKey: 'MaintenanceSystem',
-          name: 'Maintenance System',
-        },
-      ];
-      function updateRequestButton() {
-        const btn = document.getElementById('requestBtn');
-        const permission = JSON.parse(localStorage.getItem('permission'));
-
-        if (!btn || !permission) {
-          return;
-        }
-
-        // Admin ใช้ได้ทุกระบบ ไม่ต้องขออนุมัติ
-        if (permission.role === 'Admin') {
-          btn.classList.add('disabled');
-          btn.disabled = true;
-          btn.innerText = '✅ ใช้งานครบแล้ว';
-          return;
-        }
-
-        // อ่านรายการที่เคยส่งคำขอไปแล้วจาก RequestTools
-        const requestedTools = getRequestedTools(permission);
-
-        // เช็กว่า Tool ทั้งหมด:
-        // 1. มีสิทธิ์แล้ว = Y
-        // หรือ
-        // 2. เคยส่งคำขอแล้ว
-        const allToolsCovered = TOOL_LIST.every((tool) => {
-          const key = tool.permissionKey;
-
-          return permission[key] === 'Y' || requestedTools.includes(key);
-        });
-
-        // ถ้ามีสิทธิ์ครบ หรือขอครบหมดแล้ว ให้ปุ่มเป็นสีเทา
-        if (allToolsCovered) {
-          btn.classList.add('disabled');
-          btn.disabled = true;
-          btn.innerText = '⏳ รอดำเนินการ';
-        } else {
-          btn.classList.remove('disabled');
-          btn.disabled = false;
-          btn.innerText = '📝 ขออนุมัติใช้งาน';
-        }
-      }
-      function openRequestModal() {
-        const permission = JSON.parse(localStorage.getItem('permission'));
-
-        if (!permission) {
-          alert('กรุณา Login ก่อนขออนุมัติ');
-          return;
-        }
-
-        const btn = document.getElementById('requestBtn');
-
-        if (btn.disabled) {
-          return;
-        }
-
-        const requestedTools = getRequestedTools(permission);
-
-        const list = document.getElementById('requestToolList');
-        list.innerHTML = '';
-
-        TOOL_LIST.forEach((tool) => {
-          const hasPermission =
-            permission.role === 'Admin' ||
-            permission[tool.permissionKey] === 'Y';
-
-          const alreadyRequested = requestedTools.includes(tool.permissionKey);
-
-          const item = document.createElement('label');
-          item.className = 'request-item';
-
-          if (hasPermission) {
-            item.classList.add('approved');
-          }
-
-          if (alreadyRequested && !hasPermission) {
-            item.classList.add('requested');
-          }
-
-          item.innerHTML = `
-      <span>${tool.name}</span>
-      <input
-        type="checkbox"
-        value="${tool.permissionKey}"
-        ${hasPermission || alreadyRequested ? 'disabled' : ''}
-      >
-    `;
-
-          list.appendChild(item);
-        });
-
-        document.getElementById('requestModal').style.display = 'flex';
-      }
-      function closeRequestModal() {
-        document.getElementById('requestModal').style.display = 'none';
-      }
-      function submitToolRequest() {
-        const checked = document.querySelectorAll(
-          "#requestToolList input[type='checkbox']:checked"
-        );
-
-        if (checked.length === 0) {
-          alert('กรุณาเลือกระบบที่ต้องการขออนุมัติ');
-          return;
-        }
-
-        const tools = Array.from(checked).map((x) => x.value);
-
-        const user = JSON.parse(localStorage.getItem('loginUser'));
-
-        if (!user) {
-          alert('กรุณา Login ก่อนส่งคำขอ');
-          return;
-        }
-
-        const script = document.createElement('script');
-
-        script.src =
-          API_URL +
-          '?action=requestTools' +
-          '&email=' +
-          encodeURIComponent(user.email) +
-          '&name=' +
-          encodeURIComponent(user.name || '') +
-          '&tools=' +
-          encodeURIComponent(tools.join(',')) +
-          '&callback=requestToolsResult' +
-          '&t=' +
-          new Date().getTime();
-
-        document.body.appendChild(script);
-      }
-      window.requestToolsResult = function (result) {
-        console.log('Request tools result', result);
-
-        alert(
-          result.message || 'ส่งคำขออนุมัติเรียบร้อยแล้ว กรุณารอผู้ดูแลระบบ'
-        );
-
-        const permission = JSON.parse(localStorage.getItem('permission'));
-
-        if (permission && result.tools) {
-          const oldRequested = getRequestedTools(permission);
-
-          const newRequested = result.tools
-            .split(',')
-            .map((x) => x.trim())
-            .filter(Boolean);
-
-          const mergedRequested = Array.from(
-            new Set([...oldRequested, ...newRequested])
-          );
-
-          permission.requestTools = mergedRequested.join(',');
-
-          permission.requestStatus = 'Pending';
-
-          localStorage.setItem('permission', JSON.stringify(permission));
-        }
-
-        closeRequestModal();
-
-        const user = JSON.parse(localStorage.getItem('loginUser'));
-
-        showLauncher(user);
-      };
-      function getRequestedTools(permission) {
-        if (!permission || !permission.requestTools) {
-          return [];
-        }
-
-        return String(permission.requestTools)
-          .split(',')
-          .map((x) => x.trim())
-          .filter(Boolean);
-      }
+                        function lockTool(toolId) {
+              const card = document.getElementById(toolId);
+
+              if (card) {
+                card.classList.add("locked");
+              }
+            }
+
+            function unlockTool(toolId) {
+              const card = document.getElementById(toolId);
+
+              if (card) {
+                card.classList.remove("locked");
+              }
+            }
+                        function showLauncher(data) {
+                    document.getElementById("loginBox").style.display = "none";
+                    document.getElementById("launcher").style.display = "block";
+
+                    document.getElementById("username").innerText =
+                      data.name || data.email || "User";
+
+                    document.getElementById("avatar").src =
+                      data.picture || "";
+
+                    const permission =
+                      JSON.parse(localStorage.getItem("permission"));
+
+                    // รีเซ็ตทุกการ์ดก่อน
+                    TOOL_LIST.forEach(tool => {
+                      unlockTool(tool.id);
+                    });
+
+                    if (!permission) {
+                      TOOL_LIST.forEach(tool => {
+                        lockTool(tool.id);
+                      });
+
+                      updateRequestButton();
+                      return;
+                    }
+
+                    // ถ้า Pending ให้ล็อกทุกระบบ
+                    if (permission.status !== "Approved") {
+                      TOOL_LIST.forEach(tool => {
+                        lockTool(tool.id);
+                      });
+
+                      updateRequestButton();
+                      return;
+                    }
+
+                    // Admin ใช้ได้ทั้งหมด
+                    if (permission.role === "Admin") {
+                      TOOL_LIST.forEach(tool => {
+                        unlockTool(tool.id);
+                      });
+
+                      updateRequestButton();
+                      return;
+                    }
+
+                    // User ใช้ได้ตามคอลัมน์ใน Google Sheet
+                    TOOL_LIST.forEach(tool => {
+                      const key = tool.permissionKey;
+
+                      if (permission[key] !== "Y") {
+                        lockTool(tool.id);
+                      }
+                    });
+
+                    updateRequestButton();
+                  }
+
+                          if (permission.role === 'Admin') {
+                            TOOL_LIST.forEach((tool) => unlockTool(tool.id));
+                            updateRequestButton();
+                            return;
+                          }
+
+                          TOOL_LIST.forEach((tool) => {
+                            if (permission[tool.permissionKey] !== 'Y') {
+                              lockTool(tool.id);
+                            }
+                          });
+
+                          updateRequestButton();
+                        }
+                        function requestAccess(payload) {
+                          window.pendingPayload = payload;
+
+                          const script = document.createElement('script');
+
+                          script.src =
+                            API_URL +
+                            '?action=request' +
+                            '&email=' +
+                            encodeURIComponent(payload.email) +
+                            '&name=' +
+                            encodeURIComponent(payload.name || '') +
+                            '&callback=requestAccessResult' +
+                            '&t=' +
+                            new Date().getTime();
+
+                          document.body.appendChild(script);
+                        }
+
+                        window.requestAccessResult = function (result) {
+                          console.log('Request result', result);
+
+                          alert(result.message || 'ส่งคำขอใช้งานแล้ว กรุณารอผู้ดูแลอนุมัติ');
+
+                          const payload = window.pendingPayload;
+
+                          const pendingPermission = {
+                            email: payload.email,
+                            role: 'User',
+                            status: 'Pending',
+                            tool1: 'N',
+                            tool2: 'N',
+                            tool3: 'N',
+                            tool4: 'N',
+                          };
+
+                          localStorage.setItem('loginUser', JSON.stringify(payload));
+
+                          localStorage.setItem('permission', JSON.stringify(pendingPermission));
+
+                          showLauncher(payload);
+                        };
+                        function logout() {
+                          localStorage.clear();
+
+                          if (window.google) {
+                            google.accounts.id.disableAutoSelect();
+                          }
+
+                          location.reload();
+                        }
+
+                        window.onload = function () {
+                          const user = localStorage.getItem('loginUser');
+                          const permission = localStorage.getItem('permission');
+                          const savedTheme = localStorage.getItem('theme');
+
+                          if (savedTheme === 'dark') {
+                            document.body.classList.add('dark');
+
+                            const btn = document.getElementById('themeBtn');
+
+                            if (btn) {
+                              btn.innerHTML = '☀️ Light Mode';
+                            }
+                          }
+
+                          if (user && permission) {
+                            showLauncher(JSON.parse(user));
+                          } else {
+                            document.getElementById('loginBox').style.display = 'block';
+                            document.getElementById('launcher').style.display = 'none';
+                          }
+                        };
+
+                        function toggleTheme() {
+                          document.body.classList.toggle('dark');
+
+                          const btn = document.getElementById('themeBtn');
+
+                          if (document.body.classList.contains('dark')) {
+                            localStorage.setItem('theme', 'dark');
+                            btn.textContent = '☀️ Light Mode';
+                          } else {
+                            localStorage.setItem('theme', 'light');
+                            btn.textContent = '🌙 Dark Mode';
+                          }
+                        }
+                        const TOOL_LIST = [
+                          {
+                            id: 'DashboardPROMAX',
+                            permissionKey: 'DashboardPROMAX',
+                            name: 'Dashboard PRO MAX',
+                          },
+                          {
+                            id: 'FieldReportDashboard',
+                            permissionKey: 'FieldReportDashboard',
+                            name: 'Field Report Dashboard',
+                          },
+                          {
+                            id: 'InventorySystem',
+                            permissionKey: 'InventorySystem',
+                            name: 'Inventory System',
+                          },
+                          {
+                            id: 'MaintenanceSystem',
+                            permissionKey: 'MaintenanceSystem',
+                            name: 'Maintenance System',
+                          },
+                        ];
+                        function updateRequestButton() {
+                          const btn = document.getElementById('requestBtn');
+                          const permission = JSON.parse(localStorage.getItem('permission'));
+
+                          if (!btn || !permission) {
+                            return;
+                          }
+
+                          // Admin ใช้ได้ทุกระบบ ไม่ต้องขออนุมัติ
+                          if (permission.role === 'Admin') {
+                            btn.classList.add('disabled');
+                            btn.disabled = true;
+                            btn.innerText = '✅ ใช้งานครบแล้ว';
+                            return;
+                          }
+
+                          // อ่านรายการที่เคยส่งคำขอไปแล้วจาก RequestTools
+                          const requestedTools = getRequestedTools(permission);
+
+                          // เช็กว่า Tool ทั้งหมด:
+                          // 1. มีสิทธิ์แล้ว = Y
+                          // หรือ
+                          // 2. เคยส่งคำขอแล้ว
+                          const allToolsCovered = TOOL_LIST.every((tool) => {
+                            const key = tool.permissionKey;
+
+                            return permission[key] === 'Y' || requestedTools.includes(key);
+                          });
+
+                          // ถ้ามีสิทธิ์ครบ หรือขอครบหมดแล้ว ให้ปุ่มเป็นสีเทา
+                          if (allToolsCovered) {
+                            btn.classList.add('disabled');
+                            btn.disabled = true;
+                            btn.innerText = '⏳ รอดำเนินการ';
+                          } else {
+                            btn.classList.remove('disabled');
+                            btn.disabled = false;
+                            btn.innerText = '📝 ขออนุมัติใช้งาน';
+                          }
+                        }
+                        function openRequestModal() {
+                          const permission = JSON.parse(localStorage.getItem('permission'));
+
+                          if (!permission) {
+                            alert('กรุณา Login ก่อนขออนุมัติ');
+                            return;
+                          }
+
+                          const btn = document.getElementById('requestBtn');
+
+                          if (btn.disabled) {
+                            return;
+                          }
+
+                          const requestedTools = getRequestedTools(permission);
+
+                          const list = document.getElementById('requestToolList');
+                          list.innerHTML = '';
+
+                          TOOL_LIST.forEach((tool) => {
+                            const hasPermission =
+                              permission.role === 'Admin' ||
+                              permission[tool.permissionKey] === 'Y';
+
+                            const alreadyRequested = requestedTools.includes(tool.permissionKey);
+
+                            const item = document.createElement('label');
+                            item.className = 'request-item';
+
+                            if (hasPermission) {
+                              item.classList.add('approved');
+                            }
+
+                            if (alreadyRequested && !hasPermission) {
+                              item.classList.add('requested');
+                            }
+
+                            item.innerHTML = `
+                        <span>${tool.name}</span>
+                        <input
+                          type="checkbox"
+                          value="${tool.permissionKey}"
+                          ${hasPermission || alreadyRequested ? 'disabled' : ''}
+                        >
+                      `;
+
+                            list.appendChild(item);
+                          });
+
+                          document.getElementById('requestModal').style.display = 'flex';
+                        }
+                        function closeRequestModal() {
+                          document.getElementById('requestModal').style.display = 'none';
+                        }
+                        function submitToolRequest() {
+                          const checked = document.querySelectorAll(
+                            "#requestToolList input[type='checkbox']:checked"
+                          );
+
+                          if (checked.length === 0) {
+                            alert('กรุณาเลือกระบบที่ต้องการขออนุมัติ');
+                            return;
+                          }
+
+                          const tools = Array.from(checked).map((x) => x.value);
+
+                          const user = JSON.parse(localStorage.getItem('loginUser'));
+
+                          if (!user) {
+                            alert('กรุณา Login ก่อนส่งคำขอ');
+                            return;
+                          }
+
+                          const script = document.createElement('script');
+
+                          script.src =
+                            API_URL +
+                            '?action=requestTools' +
+                            '&email=' +
+                            encodeURIComponent(user.email) +
+                            '&name=' +
+                            encodeURIComponent(user.name || '') +
+                            '&tools=' +
+                            encodeURIComponent(tools.join(',')) +
+                            '&callback=requestToolsResult' +
+                            '&t=' +
+                            new Date().getTime();
+
+                          document.body.appendChild(script);
+                        }
+                        window.requestToolsResult = function (result) {
+                          console.log('Request tools result', result);
+
+                          alert(
+                            result.message || 'ส่งคำขออนุมัติเรียบร้อยแล้ว กรุณารอผู้ดูแลระบบ'
+                          );
+
+                          const permission = JSON.parse(localStorage.getItem('permission'));
+
+                          if (permission && result.tools) {
+                            const oldRequested = getRequestedTools(permission);
+
+                            const newRequested = result.tools
+                              .split(',')
+                              .map((x) => x.trim())
+                              .filter(Boolean);
+
+                            const mergedRequested = Array.from(
+                              new Set([...oldRequested, ...newRequested])
+                            );
+
+                            permission.requestTools = mergedRequested.join(',');
+
+                            permission.requestStatus = 'Pending';
+
+                            localStorage.setItem('permission', JSON.stringify(permission));
+                          }
+
+                          closeRequestModal();
+
+                          const user = JSON.parse(localStorage.getItem('loginUser'));
+
+                          showLauncher(user);
+                        };
+                        function getRequestedTools(permission) {
+                          if (!permission || !permission.requestTools) {
+                            return [];
+                          }
+
+                          return String(permission.requestTools)
+                            .split(',')
+                            .map((x) => x.trim())
+                            .filter(Boolean);
+                        }
     </script>
     <div id="requestModal" class="modal">
       <div class="modal-box">
