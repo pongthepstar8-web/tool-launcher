@@ -589,19 +589,40 @@
 
       function openTool(toolId) {
         const card = document.getElementById(toolId);
+
         if (!card) {
+          sendLog('OPEN_TOOL', toolId, '-', 'Error', 'Tool card not found');
+
           alert('ไม่พบระบบนี้');
           return;
         }
+
+        const toolName = card.querySelector('.title')?.innerText || toolId;
+
         if (card.classList.contains('locked')) {
+          sendLog(
+            'OPEN_LOCKED_TOOL',
+            toolId,
+            toolName,
+            'Denied',
+            'Tool waiting approval'
+          );
+
           alert('ระบบนี้รออนุมัติ กรุณาติดต่อผู้ดูแลระบบ');
           return;
         }
+
         const url = card.getAttribute('data-url');
+
         if (!url) {
+          sendLog('OPEN_TOOL', toolId, toolName, 'Error', 'No URL configured');
+
           alert('ยังไม่ได้ตั้งค่า URL ของระบบนี้');
           return;
         }
+
+        sendLog('OPEN_TOOL', toolId, toolName, 'Success', 'Opened tool');
+
         window.open(url, '_blank');
       }
 
@@ -724,6 +745,13 @@
 
         const tools = Array.from(checked).map((x) => x.value);
 
+        sendLog(
+          'REQUEST_TOOL',
+          tools.join(','),
+          tools.join(','),
+          'Pending',
+          'Request tool approval'
+        );
         const user = JSON.parse(localStorage.getItem('loginUser'));
 
         if (!user) {
@@ -825,19 +853,22 @@
         };
         localStorage.setItem('loginUser', JSON.stringify(payload));
         localStorage.setItem('permission', JSON.stringify(pendingPermission));
+        sendLog('LOGIN', '-', '-', 'Success', 'Google Login Success');
         showLauncher(payload);
       };
 
       function logout() {
-        localStorage.removeItem('factoryAuth');
-        localStorage.removeItem('loginUser');
-        localStorage.removeItem('permission');
+        sendLog('LOGOUT', '-', '-', 'Success', 'User logout');
 
-        if (window.google) {
-          google.accounts.id.disableAutoSelect();
-        }
+        setTimeout(function () {
+          localStorage.clear();
 
-        location.reload();
+          if (window.google) {
+            google.accounts.id.disableAutoSelect();
+          }
+
+          location.reload();
+        }, 500);
       }
 
       window.onload = function () {
@@ -867,6 +898,40 @@
           btn.textContent = '🌙 Dark Mode';
         }
       }
+      function sendLog(actionType, toolKey, toolName, status, detail) {
+        const user = JSON.parse(localStorage.getItem('loginUser') || '{}');
+
+        const script = document.createElement('script');
+
+        script.src =
+          API_URL +
+          '?action=log' +
+          '&email=' +
+          encodeURIComponent(user.email || '') +
+          '&name=' +
+          encodeURIComponent(user.name || '') +
+          '&actionType=' +
+          encodeURIComponent(actionType || '') +
+          '&toolKey=' +
+          encodeURIComponent(toolKey || '-') +
+          '&toolName=' +
+          encodeURIComponent(toolName || '-') +
+          '&status=' +
+          encodeURIComponent(status || '') +
+          '&detail=' +
+          encodeURIComponent(detail || '') +
+          '&userAgent=' +
+          encodeURIComponent(navigator.userAgent) +
+          '&callback=logResult' +
+          '&t=' +
+          new Date().getTime();
+
+        document.body.appendChild(script);
+      }
+
+      window.logResult = function (result) {
+        console.log('Log result', result);
+      };
     </script>
   </body>
 </html>
