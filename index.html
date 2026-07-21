@@ -285,11 +285,65 @@
       body.dark .request-item {
         background: #1f1f1f;
       }
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .loading-box {
+        background: white;
+        padding: 28px 34px;
+        border-radius: 18px;
+        text-align: center;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+        min-width: 220px;
+      }
+
+      .spinner {
+        width: 46px;
+        height: 46px;
+        border: 5px solid #e5e7eb;
+        border-top: 5px solid #0d6efd;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+        margin: 0 auto 15px auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #loadingText {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      body.dark .loading-box {
+        background: #2d2d2d;
+        color: white;
+      }
+
+      body.dark #loadingText {
+        color: white;
+      }
     </style>
   </head>
   <body>
     <h1>🏭 Factory Tool Launcher</h1>
-
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <div id="loadingText">กำลังโหลด...</div>
+      </div>
+    </div>
     <div id="loginBox">
       <div class="login-card">
         <h2>🔐 Login ด้วย Google</h2>
@@ -414,7 +468,26 @@
           name: 'Maintenance System',
         },
       ];
+      function showLoading(text) {
+        const overlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
 
+        if (loadingText) {
+          loadingText.innerText = text || 'กำลังโหลด...';
+        }
+
+        if (overlay) {
+          overlay.style.display = 'flex';
+        }
+      }
+
+      function hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+
+        if (overlay) {
+          overlay.style.display = 'none';
+        }
+      }
       function normalizeStatus(value) {
         const v = String(value || '').trim();
         if (v === 'Y') return 'Approved';
@@ -438,9 +511,8 @@
       window.handleCredentialResponse = function (response) {
         const payload = parseJwt(response.credential);
 
-        console.log('Google Login Success', payload);
+        showLoading('กำลังตรวจสอบบัญชี Google...');
 
-        // สร้าง Token กลางไว้ให้ระบบอื่นตรวจ
         localStorage.setItem(
           'factoryAuth',
           JSON.stringify({
@@ -450,10 +522,14 @@
           })
         );
 
+        console.log('Google Login Success', payload);
+
         window.googlePayload = payload;
 
         const jsonpUrl =
           API_URL + '?callback=processUsers&t=' + new Date().getTime();
+
+        console.log('Loading Apps Script:', jsonpUrl);
 
         const script = document.createElement('script');
         script.src = jsonpUrl;
@@ -463,6 +539,8 @@
         };
 
         script.onerror = function () {
+          hideLoading();
+
           console.error('Apps Script load failed:', jsonpUrl);
           alert('โหลดข้อมูลสิทธิ์จาก Google Sheet ไม่สำเร็จ');
         };
@@ -472,23 +550,40 @@
 
       window.processUsers = function (users) {
         const payload = window.googlePayload;
+
         console.log('Users from Sheet', users);
+
         const user = users.find(
           (x) =>
             String(x.email).toLowerCase() ===
             String(payload.email).toLowerCase()
         );
+
         console.log('Matched user', user);
+
         if (!user) {
+          hideLoading();
+
           const ask = confirm(
             'ยังไม่มีสิทธิ์ใช้งาน ต้องการส่งคำขออนุมัติหรือไม่?'
           );
-          if (ask) requestAccess(payload);
+
+          if (ask) {
+            requestAccess(payload);
+          }
+
           return;
         }
+
         localStorage.setItem('loginUser', JSON.stringify(payload));
         localStorage.setItem('permission', JSON.stringify(user));
-        if (user.status !== 'Approved') alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
+
+        if (user.status !== 'Approved') {
+          alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
+        }
+
+        hideLoading();
+
         showLauncher(payload);
       };
 
@@ -621,18 +716,26 @@
         const checked = document.querySelectorAll(
           "#requestToolList input[type='checkbox']:checked"
         );
+
         if (checked.length === 0) {
           alert('กรุณาเลือกระบบที่ต้องการขออนุมัติ');
           return;
         }
+
         const tools = Array.from(checked).map((x) => x.value);
+
         const user = JSON.parse(localStorage.getItem('loginUser'));
+
         if (!user) {
           alert('กรุณา Login ก่อนส่งคำขอ');
           return;
         }
+
+        showLoading('กำลังส่งคำขออนุมัติ...');
+
         const script = document.createElement('script');
-        const jsonpUrl =
+
+        script.src =
           API_URL +
           '?action=requestTools' +
           '&email=' +
@@ -643,15 +746,22 @@
           encodeURIComponent(tools.join(',')) +
           '&callback=requestToolsResult&t=' +
           new Date().getTime();
-        console.log('Request tools URL:', jsonpUrl);
-        script.src = jsonpUrl;
+
+        script.onerror = function () {
+          hideLoading();
+          alert('ส่งคำขอไม่สำเร็จ กรุณาลองใหม่');
+        };
+
         document.body.appendChild(script);
       }
 
       window.requestToolsResult = function (result) {
+        hideLoading();
+
         alert(
           result.message || 'ส่งคำขออนุมัติเรียบร้อยแล้ว กรุณารอผู้ดูแลระบบ'
         );
+
         const permission = JSON.parse(localStorage.getItem('permission'));
         if (permission && result.tools) {
           const requestedTools = result.tools
@@ -672,8 +782,12 @@
       };
 
       function requestAccess(payload) {
+        showLoading('กำลังส่งคำขอใช้งาน...');
+
         window.pendingPayload = payload;
+
         const script = document.createElement('script');
+
         script.src =
           API_URL +
           '?action=request' +
@@ -683,11 +797,20 @@
           encodeURIComponent(payload.name || '') +
           '&callback=requestAccessResult&t=' +
           new Date().getTime();
+
+        script.onerror = function () {
+          hideLoading();
+          alert('ส่งคำขอไม่สำเร็จ กรุณาลองใหม่');
+        };
+
         document.body.appendChild(script);
       }
 
       window.requestAccessResult = function (result) {
+        hideLoading();
+
         alert(result.message || 'ส่งคำขอใช้งานแล้ว กรุณารอผู้ดูแลอนุมัติ');
+
         const payload = window.pendingPayload;
         const pendingPermission = {
           email: payload.email,
