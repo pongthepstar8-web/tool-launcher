@@ -468,6 +468,8 @@
           name: 'Maintenance System',
         },
       ];
+      let loadingTimer = null;
+
       function showLoading(text) {
         const overlay = document.getElementById('loadingOverlay');
         const loadingText = document.getElementById('loadingText');
@@ -479,6 +481,13 @@
         if (overlay) {
           overlay.style.display = 'flex';
         }
+
+        clearTimeout(loadingTimer);
+
+        loadingTimer = setTimeout(function () {
+          hideLoading();
+          alert('ระบบใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง');
+        }, 15000);
       }
 
       function hideLoading() {
@@ -487,6 +496,8 @@
         if (overlay) {
           overlay.style.display = 'none';
         }
+
+        clearTimeout(loadingTimer);
       }
       function normalizeStatus(value) {
         const v = String(value || '').trim();
@@ -581,9 +592,15 @@
         sendLog('LOGIN', '-', '-', 'Success', 'Google Login Success');
 
         if (user.status !== 'Approved') {
+          hideLoading();
+
           alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
+
+          showLauncher(payload);
+          return;
         }
 
+        hideLoading();
         showLauncher(payload);
       };
 
