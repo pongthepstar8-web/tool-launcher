@@ -578,11 +578,11 @@
         localStorage.setItem('loginUser', JSON.stringify(payload));
         localStorage.setItem('permission', JSON.stringify(user));
 
+        sendLog('LOGIN', '-', '-', 'Success', 'Google Login Success');
+
         if (user.status !== 'Approved') {
           alert('บัญชีนี้อยู่ระหว่างรออนุมัติ');
         }
-
-        hideLoading();
 
         showLauncher(payload);
       };
